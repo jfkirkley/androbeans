@@ -7,6 +7,7 @@ import org.androware.androbeans.utils.Utils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class LinkObjectReadListener implements ObjectReadListener {
     public static final String IDREF_PREFIX = "__idref__";
     public static final String BEAN_ID = "__id__";
     public static final String MERGE_PREFIX = "__merge__";
+    public static final String DEFAULT_POST_INIT_METHOD = "__init__";
 
     private HashMap<String, Map> refMap = new HashMap<>();
     private HashMap<String, Object> idMap = new HashMap<>();
@@ -86,6 +88,11 @@ public class LinkObjectReadListener implements ObjectReadListener {
         if (pendingMergeMap.containsKey(objectReader)) {
             BeanRef beanRef = pendingMergeMap.get(objectReader);
             merge(value, beanRef.getBean());
+        }
+
+        if(ReflectionUtils.hasMethod(value.getClass(), DEFAULT_POST_INIT_METHOD)){
+            Method initMethod = ReflectionUtils.getMethod(value.getClass(), DEFAULT_POST_INIT_METHOD);
+            ReflectionUtils.callMethod(value, initMethod);
         }
         return null;
     }

@@ -1,11 +1,11 @@
 package org.androware.androbeans.utils;
 
 
-import android.view.View;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -64,6 +64,38 @@ public class ReflectionUtils {
             e.printStackTrace();
         }
 
+    }
+
+    public static boolean hasMethod(Class c, String methodName, Class... paramTypes) {
+
+        try {
+            c.getMethod(methodName, paramTypes);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+
+    }
+
+
+    public static Method getMethod(Class c, String methodName, Class... paramTypes) {
+
+        try {
+            return c.getMethod(methodName, paramTypes);
+        } catch (NoSuchMethodException e) {
+        }
+        return null;
+    }
+
+    public static Object callMethod(Object target, Method method, Object... args) {
+
+        try {
+            return method.invoke(target, args);
+        } catch (InvocationTargetException e) {
+            // TODO handle this properly
+        } catch (IllegalAccessException e) {
+        }
+        return null;
     }
 
     public static Constructor getConstructor(Class c, Class... args) {

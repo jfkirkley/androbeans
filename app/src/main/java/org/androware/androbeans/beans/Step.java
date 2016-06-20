@@ -54,6 +54,9 @@ public class Step extends JSONinstaBean {
         this.name = name;
     }
 
+    public void __init__() {
+        l("__init__: has been called !!!!!!!!!!!!!!! --------------------------------");
+    }
 
     public Step() {
     }
