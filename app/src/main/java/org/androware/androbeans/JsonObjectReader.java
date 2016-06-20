@@ -39,7 +39,13 @@ public class JsonObjectReader implements ObjectReader {
             this.setObjectReadListeners(parent.getObjectReadListeners());
         }
 
-        target = ReflectionUtils.newInstance(type);
+        target = invokeListenersOnCreate(type);
+        if(target == null) {
+            target = ReflectionUtils.newInstance(type);
+        } else {
+            this.type = target.getClass();
+        }
+        invokeListenersOnPostCreate();
     }
 
     public JsonObjectReader(InputStream in, Class type) throws IOException {
@@ -119,6 +125,21 @@ public class JsonObjectReader implements ObjectReader {
             value = objectReadListener.onValue(value, field, this);
         }
         return value;
+    }
+
+    protected Object invokeListenersOnCreate(Class type) throws IOException {
+        Object object = null;
+        for(ObjectReadListener objectReadListener: objectReadListeners) {
+            // values is chained through the listeners - hence order is important
+             object = objectReadListener.onCreate(type, this);
+        }
+        return object;
+    }
+
+    protected void invokeListenersOnPostCreate() throws IOException {
+        for(ObjectReadListener objectReadListener: objectReadListeners) {
+            objectReadListener.onPostCreate(target, this);
+        }
     }
 
     public Object readValue(Class fieldType) throws IOException {

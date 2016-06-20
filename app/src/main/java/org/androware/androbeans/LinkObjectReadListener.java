@@ -23,10 +23,13 @@ public class LinkObjectReadListener implements ObjectReadListener {
     public static final String BEAN_ID = "__id__";
     public static final String MERGE_PREFIX = "__merge__";
     public static final String DEFAULT_POST_INIT_METHOD = "__init__";
+    public static final String DEFAULT_TYPE_OVERRIDE_METHOD = "__get_type_overrides__";
+
 
     private HashMap<String, Map> refMap = new HashMap<>();
     private HashMap<String, Object> idMap = new HashMap<>();
     private HashMap<ObjectReader, BeanRef> pendingMergeMap = new HashMap<>();
+    private HashMap<Class, Class> typeOverrides = new HashMap<>();
 
 
     public class BeanRef {
@@ -95,6 +98,24 @@ public class LinkObjectReadListener implements ObjectReadListener {
             ReflectionUtils.callMethod(value, initMethod);
         }
         return null;
+    }
+
+    @Override
+    public Object onCreate(Class type, ObjectReader objectReader) {
+        if(typeOverrides.containsKey(type)) {
+            Class overrideType = typeOverrides.get(type);
+            return ReflectionUtils.newInstance(overrideType);
+        }
+        return null;
+    }
+
+    @Override
+    public void onPostCreate(Object newObject, ObjectReader objectReader) {
+        Method method = ReflectionUtils.getMethod(newObject.getClass(), DEFAULT_TYPE_OVERRIDE_METHOD, Map.class);
+        if( method != null ) {
+            ReflectionUtils.callMethod(newObject, method, typeOverrides);
+        }
+
     }
 
     public void merge(Object thisBean, Object thatBean) {

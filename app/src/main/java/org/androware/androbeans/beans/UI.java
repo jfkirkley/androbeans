@@ -16,6 +16,7 @@ import org.androware.androbeans.R;
  */
 public class UI extends JSONinstaBean {
 
+    public ListSpec listSpec;
 
     public UI() {
     }

@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
         FilterLog.inst().activateTag(TAG);
 
         try {
-            JsonObjectReader jsonObjectReader = new JsonObjectReader(Utils.getResourceInputStream(this, "test_merge", R.raw.class), Flow.class);
+            JsonObjectReader jsonObjectReader = new JsonObjectReader(Utils.getResourceInputStream(this, "test_flow", R.raw.class), Flow.class);
             jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
             Flow flow = (Flow) jsonObjectReader.read();
 
