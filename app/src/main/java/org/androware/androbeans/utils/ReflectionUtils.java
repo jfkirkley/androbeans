@@ -31,8 +31,42 @@ public class ReflectionUtils {
         return null;
     }
 
+    public static Field getField(Class c, String fieldName) {
+        try {
+            return c.getField(fieldName);
+        } catch (NoSuchFieldException e) {
+        }
+        return null;
+    }
 
+    public static Field getDeclaredField(Class c, String fieldName) {
+        try {
+            return c.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+        }
+        return null;
+    }
 
+    public static Object getFieldValue(Object target, String fieldName) {
+        return getFieldValue(getField(target.getClass(), fieldName), target);
+    }
+
+    public static Object getStaticFieldValue(Class targetClass, String fieldName) {
+        Field field = getField(targetClass, fieldName);
+        return getFieldValue(field, (Object)null);
+    }
+
+    public static Object getDeclaredFieldValue(Object target, String fieldName) {
+        return getFieldValue(getDeclaredField(target.getClass(), fieldName), target);
+    }
+
+    public static Object getStaticDeclaredFieldValue(Class targetClass, String fieldName) {
+        return getFieldValue(getDeclaredField(targetClass, fieldName), (Object)null);
+    }
+
+    public static Class getInnerClass(Class ofthis,  String innerClassName) {
+        return getClass(ofthis.getName() + "$" + innerClassName);
+    }
 
     public static Class getFieldType(Class targetClass, String fieldName) {
         try {

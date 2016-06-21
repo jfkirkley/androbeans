@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.androware.androbeans.beans.Flow;
-import org.androware.androbeans.beans.Top;
+import org.androware.androbeans.utils.ResourceUtils;
 import org.androware.androbeans.utils.Utils;
 
 import java.io.FileOutputStream;
@@ -29,10 +29,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ResourceUtils.R = R.class;
         FilterLog.inst().activateTag(TAG);
 
         try {
-            JsonObjectReader jsonObjectReader = new JsonObjectReader(Utils.getResourceInputStream(this, "test_flow", R.raw.class), Flow.class);
+            JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_flow", "raw"), Flow.class);
             jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
             Flow flow = (Flow) jsonObjectReader.read();
 

@@ -24,8 +24,7 @@ import android.widget.ArrayAdapter;
 
 import android.widget.ListView;
 
-import android.widget.TextView;
-import android.widget.Toast;
+//import org.androware.androbeans.R;
 
 import org.androware.androbeans.R;
 
@@ -33,7 +32,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -43,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -51,8 +48,7 @@ import java.util.Set;
  */
 public class Utils {
 
-    public static Toast currentToast;
-
+    public static Object R;
 
     public static void showAlert(String msg, String title, Context context) {
         AlertDialog a = new AlertDialog.Builder(context)
@@ -105,33 +101,10 @@ public class Utils {
         adapter.notifyDataSetChanged();
     }
 
-    public static int getResId(String resName, Class<?> c) {
-
-        try {
-            Field idField = c.getDeclaredField(resName);
-            return idField.getInt(idField);
-        } catch (Exception e) {
-            //e.printStackTrace();
-            return -1;
-        }
-    }
-
-    public static InputStream getResourceInputStream(Activity activity, String resourceName, Class resourceClass) {
-        return activity.getResources().openRawResource(Utils.getResId(resourceName, resourceClass));
-    }
-
     public static void setLayoutHeight(ViewGroup viewGroup, int height) {
         ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) viewGroup.getLayoutParams();
         params.height = height;
         viewGroup.setLayoutParams(params);
-    }
-
-    public static int getLayoutResId(String layoutId) {
-        return getResId(layoutId, R.layout.class);
-    }
-
-    public static int getViewResId(String viewId) {
-        return getResId(viewId, R.id.class);
     }
 
     public static Object getListener(View v, String listenerType) {
@@ -160,16 +133,16 @@ public class Utils {
     }
 
     public static View findView(Activity activity, String viewId) {
-        return activity.findViewById(getViewResId(viewId));
+        return activity.findViewById(ResourceUtils.getViewResId(viewId));
     }
 
     public static void setLayout(Activity activity, String layoutId) {
-        activity.setContentView(getLayoutResId(layoutId));
+        activity.setContentView(ResourceUtils.getLayoutResId(layoutId));
     }
 
     public static View inflateView(String layoutId, LayoutInflater inflater, ViewGroup container) {
         // Inflate the layout for this fragment
-        return inflater.inflate(Utils.getLayoutResId(layoutId), container, false);
+        return inflater.inflate(ResourceUtils.getLayoutResId(layoutId), container, false);
     }
 
     public static ListView getAndSetListView(String[] listItems, String name, Activity activity) {
@@ -177,7 +150,7 @@ public class Utils {
     }
 
     public static ListView getAndSetListView(String[] listItems, String name, Activity activity, int listItemLayoutId) {
-        ListView listView = (ListView) activity.findViewById(getResId(name, R.id.class));
+        ListView listView = (ListView) activity.findViewById(ResourceUtils.getResId( "id", name ));
 
         listView.setAdapter(new ArrayAdapter<String>(activity, listItemLayoutId, listItems));
 
@@ -336,9 +309,9 @@ public class Utils {
 
 
 
-    public static int getResIdFromExtra(Intent intent, String name, Class resClass) {
+    public static int getResIdFromExtra(Intent intent, String name, String groupName) {
         Bundle extras = intent.getExtras();
-        return getResId(getExtraString(extras, name), resClass);
+         return ResourceUtils.getResId(groupName, getExtraString(extras, name));
     }
 
     public static String getStringFromExtra(Intent intent, String name) {

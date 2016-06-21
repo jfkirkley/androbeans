@@ -11,6 +11,7 @@ import org.androware.androbeans.JsonObjectReader;
 import org.androware.androbeans.JsonObjectWriter;
 import org.androware.androbeans.LinkObjectReadListener;
 import org.androware.androbeans.beans.Flow;
+import org.androware.androbeans.utils.ResourceUtils;
 import org.androware.androbeans.utils.Utils;
 
 import java.io.FileOutputStream;
@@ -32,11 +33,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ResourceUtils.R = R.class;
+
         FilterLog.inst().activateTag(TAG);
         FilterLog.inst().activateTag(JSONinstaBean.TAG);
 
         try {
-            JsonObjectReader jsonObjectReader = new JsonObjectReader(Utils.getResourceInputStream(this, "test_merge", R.raw.class), Flow.class);
+            JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_merge", "raw"), Flow.class);
             jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
             Flow flow = (Flow) jsonObjectReader.read();
 
