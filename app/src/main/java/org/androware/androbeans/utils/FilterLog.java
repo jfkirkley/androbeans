@@ -1,4 +1,4 @@
-package org.androware.androbeans;
+package org.androware.androbeans.utils;
 
 import java.util.Set;
 

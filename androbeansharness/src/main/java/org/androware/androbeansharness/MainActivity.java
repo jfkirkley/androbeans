@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.androware.androbeans.FilterLog;
-import org.androware.androbeans.JSONinstaBean;
+import org.androware.androbeans.utils.FilterLog;
+import org.androware.androbeans.legacy.JSONinstaBean;
 import org.androware.androbeans.JsonObjectReader;
 import org.androware.androbeans.JsonObjectWriter;
 import org.androware.androbeans.LinkObjectReadListener;

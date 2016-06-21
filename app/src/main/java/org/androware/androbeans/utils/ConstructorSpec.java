@@ -4,12 +4,11 @@ import android.util.JsonReader;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.sql.Ref;
 import java.util.List;
 import java.util.Map;
 
-import org.androware.androbeans.InstaBean;
-import org.androware.androbeans.JSONinstaBean;
+import org.androware.androbeans.legacy.InstaBean;
+import org.androware.androbeans.legacy.JSONinstaBean;
 
 /**
  * Created by jkirkley on 6/9/16.

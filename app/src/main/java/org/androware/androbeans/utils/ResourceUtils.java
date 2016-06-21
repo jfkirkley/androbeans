@@ -2,8 +2,6 @@ package org.androware.androbeans.utils;
 
 import android.app.Activity;
 
-import org.androware.androbeans.R;
-
 import java.io.InputStream;
 
 

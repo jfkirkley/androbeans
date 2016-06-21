@@ -1,4 +1,4 @@
-package org.androware.androbeans;
+package org.androware.androbeans.legacy;
 
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ConstructorSpec;
 import org.androware.androbeans.utils.ReflectionUtils;
 

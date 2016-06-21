@@ -24,10 +24,6 @@ import android.widget.ArrayAdapter;
 
 import android.widget.ListView;
 
-//import org.androware.androbeans.R;
-
-import org.androware.androbeans.R;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;

@@ -11,8 +11,8 @@ import java.util.Stack;
 
 
 
-import org.androware.androbeans.InstaBean;
-import org.androware.androbeans.JSONinstaBean;
+import org.androware.androbeans.legacy.InstaBean;
+import org.androware.androbeans.legacy.JSONinstaBean;
 
 import org.androware.androbeans.utils.ConstructorSpec;
 

@@ -1,20 +1,15 @@
 package org.androware.androbeans.beans;
 
 
-import android.support.v4.app.FragmentTransaction;
 import android.util.JsonReader;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.androware.androbeans.FilterLog;
-import org.androware.androbeans.InstaBean;
-import org.androware.androbeans.JSONinstaBean;
+import org.androware.androbeans.legacy.InstaBean;
+import org.androware.androbeans.legacy.JSONinstaBean;
 
 /**
  * Created by jkirkley on 5/7/16.

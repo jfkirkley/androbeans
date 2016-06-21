@@ -1,4 +1,4 @@
-package org.androware.androbeans;
+package org.androware.androbeans.legacy;
 
 import android.os.Parcel;
 import android.os.Parcelable;

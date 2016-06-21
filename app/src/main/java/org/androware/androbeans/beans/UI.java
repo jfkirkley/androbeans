@@ -1,14 +1,11 @@
 package org.androware.androbeans.beans;
 
 import android.util.JsonReader;
-import android.view.View;
 
 import java.io.IOException;
-import java.util.HashMap;
 
-import org.androware.androbeans.InstaBean;
-import org.androware.androbeans.JSONinstaBean;
-import org.androware.androbeans.R;
+import org.androware.androbeans.legacy.InstaBean;
+import org.androware.androbeans.legacy.JSONinstaBean;
 
 
 /**
