@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         FilterLog.inst().activateTag(JSONinstaBean.TAG);
 
         try {
-            JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_merge", "raw"), Flow.class);
+            JsonObjectReader jsonObjectReader =  new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_merge", "raw"), Flow.class);
             jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
             Flow flow = (Flow) jsonObjectReader.read();
 
@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
             JsonObjectWriter jsonObjectWriter = new JsonObjectWriter(fos);
             jsonObjectWriter.write(flow);
             jsonObjectWriter.close();
-        } catch( IOException e) {
+        } catch( Exception e) {
 
         }
 

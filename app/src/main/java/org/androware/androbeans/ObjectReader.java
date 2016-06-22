@@ -1,6 +1,5 @@
 package org.androware.androbeans;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -8,12 +7,12 @@ import java.util.Map;
  */
 public interface ObjectReader {
 
-    public Object read() throws IOException;
-    public String nextFieldName() throws IOException;
-    public Object nextValue() throws IOException;
-    public Object readValue(Class fieldType) throws IOException;
+    public Object read() throws ObjectReadException;
+    public String nextFieldName() throws ObjectReadException;
+    public Object nextValue() throws ObjectReadException;
+    public Object readValue(Class fieldType) throws ObjectReadException;
     public Object getTarget();
-    public Map readRefMap() throws IOException;
+    public Map readRefMap() throws ObjectReadException;
     public void addObjectReadListener(ObjectReadListener objectReadListener);
     public void removeOjectReadListener(ObjectReadListener objectReadListener);
 }

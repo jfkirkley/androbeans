@@ -81,6 +81,21 @@ public class ReflectionUtils {
         return null;
     }
 
+    public static void setField(Class targetClass, String fieldName, Object target, Object value) {
+
+        try {
+
+            Field field = null;
+            field = targetClass.getDeclaredField(fieldName);
+            field.set(target, value);
+
+        } catch (NoSuchFieldException e) {
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void forceSetField(Class targetClass, String fieldName, Object target, Object value) {
 
         try {
@@ -99,7 +114,6 @@ public class ReflectionUtils {
         }
 
     }
-
     public static boolean hasMethod(Class c, String methodName, Class... paramTypes) {
 
         try {
@@ -185,7 +199,14 @@ public class ReflectionUtils {
         return null;
     }
 
+    public static Class getGenericType(Field f) {
+        return getGenericType(f, 0);
+    }
+
     public static Class getGenericType(Field f, int indexOfType) {
+        if(f.getType().isArray()) {
+            return f.getType().getComponentType();
+        }
         ParameterizedType genericType = (ParameterizedType) f.getGenericType();
         Type t[] = genericType.getActualTypeArguments();
         return (Class) t[indexOfType];

@@ -1,17 +1,15 @@
 package org.androware.androbeans;
 
-import android.util.JsonReader;
 
 import org.androware.androbeans.utils.ReflectionUtils;
 import org.androware.androbeans.utils.Utils;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
 
 /**
  * Created by jkirkley on 6/18/16.
@@ -63,14 +61,10 @@ public class LinkObjectReadListener implements ObjectReadListener {
 
 
     @Override
-    public void onFieldName(String fieldName, Field field, ObjectReader objectReader) throws IOException {
+    public void onFieldName(String fieldName, Field field, ObjectReader objectReader) throws ObjectReadException {
         if (fieldName.startsWith(REFMAP_PREFIX)) {
 
-            try {
-                refMap.put(fieldName.substring(REFMAP_PREFIX.length()), objectReader.readRefMap());
-            } catch (IOException e) {
-                // TODO log exception
-            }
+            refMap.put(fieldName.substring(REFMAP_PREFIX.length()), objectReader.readRefMap());
 
         } else if (fieldName.equals(BEAN_ID)) {
             String id = (String) objectReader.nextValue();
@@ -82,7 +76,7 @@ public class LinkObjectReadListener implements ObjectReadListener {
     }
 
     @Override
-    public Object onValue(Object value, Field field, ObjectReader objectReader) throws IOException {
+    public Object onValue(Object value, Field field, ObjectReader objectReader) throws ObjectReadException {
         return value;
     }
 

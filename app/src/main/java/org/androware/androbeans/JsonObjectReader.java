@@ -26,21 +26,21 @@ public class JsonObjectReader implements ObjectReader {
     Class type;
     Object target;
 
-    public JsonObjectReader(JsonReader reader, Class type) throws IOException {
+    public JsonObjectReader(JsonReader reader, Class type) throws ObjectReadException {
         this(reader, type, null);
     }
 
-    public JsonObjectReader(JsonReader reader, Class type, JsonObjectReader parent) throws IOException {
+    public JsonObjectReader(JsonReader reader, Class type, JsonObjectReader parent) throws ObjectReadException {
         this.reader = reader;
         this.type = type;
         this.parent = parent;
 
-        if(parent != null) {
+        if (parent != null) {
             this.setObjectReadListeners(parent.getObjectReadListeners());
         }
 
         target = invokeListenersOnCreate(type);
-        if(target == null) {
+        if (target == null) {
             target = ReflectionUtils.newInstance(type);
         } else {
             this.type = target.getClass();
@@ -48,16 +48,20 @@ public class JsonObjectReader implements ObjectReader {
         invokeListenersOnPostCreate();
     }
 
-    public JsonObjectReader(InputStream in, Class type) throws IOException {
+    public JsonObjectReader(InputStream in, Class type) throws IOException, ObjectReadException{
         this(new JsonReader(new InputStreamReader(in, "UTF-8")), type);
     }
 
-    public void close() throws IOException {
-        reader.close();
+    public void close() throws ObjectReadException {
+        try {
+            reader.close();
+        } catch (IOException ex) {
+            throw new ObjectReadException(ex);
+        }
     }
 
     @Override
-    public Object read() throws IOException {
+    public Object read() throws ObjectReadException {
 
         try {
 
@@ -77,9 +81,9 @@ public class JsonObjectReader implements ObjectReader {
             reader.endObject();
 
         } catch (IOException e) {
-            // TODO log exceptions
+            throw new ObjectReadException(e);
         } catch (IllegalAccessException e) {
-
+            // TODO log exceptions
         }
 
         invokeListenersOnReadDone(target);
@@ -88,13 +92,21 @@ public class JsonObjectReader implements ObjectReader {
     }
 
     @Override
-    public String nextFieldName() throws IOException {
-        return reader.nextName();
+    public String nextFieldName() throws ObjectReadException {
+        try {
+            return reader.nextName();
+        } catch (IOException e) {
+            throw new ObjectReadException(e);
+        }
     }
 
     @Override
-    public Object nextValue() throws IOException {
+    public Object nextValue() throws ObjectReadException {
+        // try {
         return readAnyObject(false);
+//        } catch (IOException e) {
+        //           throw new ObjectReadException(e);
+        //      }
     }
 
     @Override
@@ -107,46 +119,46 @@ public class JsonObjectReader implements ObjectReader {
         objectReadListeners.remove(objectReadListener);
     }
 
-    protected void invokeListenersOnReadDone(Object value) throws IOException {
-        for(ObjectReadListener objectReadListener: objectReadListeners) {
+    protected void invokeListenersOnReadDone(Object value) throws ObjectReadException {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
             objectReadListener.onReadDone(value, this);
         }
     }
 
-    protected void invokeListenersOnFieldName(String fieldName, Field field) throws IOException {
-        for(ObjectReadListener objectReadListener: objectReadListeners) {
+    protected void invokeListenersOnFieldName(String fieldName, Field field) throws ObjectReadException {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
             objectReadListener.onFieldName(fieldName, field, this);
         }
     }
 
-    protected Object invokeListenersOnValue(Object value, Field field) throws IOException {
-        for(ObjectReadListener objectReadListener: objectReadListeners) {
+    protected Object invokeListenersOnValue(Object value, Field field) throws ObjectReadException {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
             // values is chained through the listeners - hence order is important
             value = objectReadListener.onValue(value, field, this);
         }
         return value;
     }
 
-    protected Object invokeListenersOnCreate(Class type) throws IOException {
+    protected Object invokeListenersOnCreate(Class type) throws ObjectReadException {
         Object object = null;
-        for(ObjectReadListener objectReadListener: objectReadListeners) {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
             // values is chained through the listeners - hence order is important
-             object = objectReadListener.onCreate(type, this);
+            object = objectReadListener.onCreate(type, this);
         }
         return object;
     }
 
-    protected void invokeListenersOnPostCreate() throws IOException {
-        for(ObjectReadListener objectReadListener: objectReadListeners) {
+    protected void invokeListenersOnPostCreate() throws ObjectReadException {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
             objectReadListener.onPostCreate(target, this);
         }
     }
 
-    public Object readValue(Class fieldType) throws IOException {
+    public Object readValue(Class fieldType) throws ObjectReadException {
         return readValue(fieldType, null);
     }
 
-    public Object readValue(Field field) throws IOException {
+    public Object readValue(Field field) throws ObjectReadException {
         return readValue(field.getType(), field);
     }
 
@@ -156,64 +168,74 @@ public class JsonObjectReader implements ObjectReader {
     }
 
 
-    public Object readValue(Class fieldType, Field field) throws IOException {
-
-        Object value = null;
-        if (int.class == fieldType) {
-            value = reader.nextInt();
-        } else if (long.class == fieldType) {
-            value = reader.nextLong();
-        } else if (double.class == fieldType) {
-            value = reader.nextDouble();
-        } else if (boolean.class == fieldType) {
-            value = reader.nextBoolean();
-        } else if (String.class == fieldType) {
-            value = reader.nextString();
-        } else if (fieldType.isArray()) {
-            value = readArray(fieldType);
-        } else if (Map.class.isAssignableFrom(fieldType)) {
-            value = readMap(field);
-        } else if (List.class.isAssignableFrom(fieldType)) {
-            value = readList(field);
-        } else {
-            value = (new JsonObjectReader(reader, fieldType, this)).read();
+    public Object readValue(Class fieldType, Field field) throws ObjectReadException {
+        try {
+            Object value = null;
+            if (int.class == fieldType) {
+                value = reader.nextInt();
+            } else if (long.class == fieldType) {
+                value = reader.nextLong();
+            } else if (double.class == fieldType) {
+                value = reader.nextDouble();
+            } else if (boolean.class == fieldType) {
+                value = reader.nextBoolean();
+            } else if (String.class == fieldType) {
+                value = reader.nextString();
+            } else if (fieldType.isArray()) {
+                value = readArray(fieldType);
+            } else if (Map.class.isAssignableFrom(fieldType)) {
+                value = readMap(field);
+            } else if (List.class.isAssignableFrom(fieldType)) {
+                value = readList(field);
+            } else {
+                value = (new JsonObjectReader(reader, fieldType, this)).read();
+            }
+            return value;
+        } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
-        return value;
     }
 
-    public Object readValueAndInvokeListeners(Class fieldType, Field field) throws IOException {
+    public Object readValueAndInvokeListeners(Class fieldType, Field field) throws ObjectReadException {
         return invokeListenersOnValue(readValue(fieldType, field), field);
     }
 
-    public Object readValueAndInvokeListeners(Field field) throws IOException {
+    public Object readValueAndInvokeListeners(Field field) throws ObjectReadException {
         return readValueAndInvokeListeners(field.getType(), field);
     }
 
-    public Object readArray(Class fieldType) throws IOException {
-        List list = new ArrayList();
-        Class componentType = fieldType == null? Object.class: fieldType.getComponentType();
-        reader.beginArray();
-        while (reader.hasNext()) {
-            if(componentType == Object.class) {
-                list.add(readAnyObject());
-            } else {
-                list.add(readValueAndInvokeListeners(componentType,null));
+    public Object readArray(Class fieldType) throws ObjectReadException {
+
+        try {
+            List list = new ArrayList();
+            Class componentType = fieldType == null ? Object.class : fieldType.getComponentType();
+            reader.beginArray();
+            while (reader.hasNext()) {
+                if (componentType == Object.class) {
+                    list.add(readAnyObject());
+                } else {
+                    list.add(readValueAndInvokeListeners(componentType, null));
+                }
             }
+            reader.endArray();
+            return (componentType == Object.class) ? list.toArray() : ReflectionUtils.toTypedArray(list, fieldType);
+        } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
-        reader.endArray();
-        return (componentType == Object.class)? list.toArray(): ReflectionUtils.toTypedArray(list, fieldType);
+
     }
 
-    public Map readMap(Field field) throws IOException {
+    public Map readMap(Field field) throws ObjectReadException {
+
         HashMap map = new HashMap();
 
         try {
-            Class valueType = field != null? ReflectionUtils.getGenericType(field, 1): Object.class;
+            Class valueType = field != null ? ReflectionUtils.getGenericType(field, 1) : Object.class;
             reader.beginObject();
             while (reader.hasNext()) {
                 String key = reader.nextName();
 
-                if(valueType == Object.class) {
+                if (valueType == Object.class) {
                     map.put(key, readAnyObject());
                 } else {
                     map.put(key, readValueAndInvokeListeners(valueType, null));
@@ -222,20 +244,21 @@ public class JsonObjectReader implements ObjectReader {
             reader.endObject();
 
         } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
 
         return map;
     }
 
-    public List readList(Field field) {
+    public List readList(Field field) throws ObjectReadException {
         List list = new ArrayList();
         try {
-            Class valueType = field != null? ReflectionUtils.getGenericType(field, 0): Object.class;
+            Class valueType = field != null ? ReflectionUtils.getGenericType(field, 0) : Object.class;
             reader.beginArray();
 
             while (reader.hasNext()) {
 
-                if(valueType == Object.class) {
+                if (valueType == Object.class) {
                     list.add(readAnyObject());
                 } else {
                     list.add(readValueAndInvokeListeners(valueType, null));
@@ -245,82 +268,93 @@ public class JsonObjectReader implements ObjectReader {
             reader.endArray();
 
         } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
         return list;
     }
 
-    public Object readAnyObject() throws IOException {
+    public Object readAnyObject() throws ObjectReadException {
         return readAnyObject(true);
     }
 
-    public Object readAnyObject(boolean invokeListeners) throws IOException {
-        Object value = null;
-        JsonToken jsonToken = reader.peek();
-        if (jsonToken == JsonToken.BEGIN_ARRAY) {
+    public Object readAnyObject(boolean invokeListeners) throws ObjectReadException {
+        try {
 
-            List list = new ArrayList<>();
+            Object value = null;
+            JsonToken jsonToken = reader.peek();
+            if (jsonToken == JsonToken.BEGIN_ARRAY) {
 
-            reader.beginArray();
-            while (reader.hasNext()) {
-                list.add(readAnyObject());
+                List list = new ArrayList<>();
+
+                reader.beginArray();
+                while (reader.hasNext()) {
+                    list.add(readAnyObject());
+                }
+                reader.endArray();
+
+                value = list;
+
+            } else if (jsonToken == JsonToken.BEGIN_OBJECT) {
+
+                Map map = new HashMap();
+
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String name = reader.nextName();
+
+                    map.put(name, readAnyObject());
+                }
+                reader.endObject();
+
+                value = map;
+            } else if (jsonToken == JsonToken.BOOLEAN) {
+                value = reader.nextBoolean();
+            } else if (jsonToken == JsonToken.NUMBER) {
+                value = reader.nextInt();
+            } else if (jsonToken == JsonToken.STRING) {
+                value = reader.nextString();
             }
-            reader.endArray();
 
-            value = list;
-
-        } else if (jsonToken == JsonToken.BEGIN_OBJECT) {
-
-            Map map = new HashMap();
-
-            reader.beginObject();
-            while (reader.hasNext()) {
-                String name = reader.nextName();
-
-                map.put(name, readAnyObject());
+            if (invokeListeners) {
+                return invokeListenersOnValue(value, null);
+            } else {
+                return value;
             }
-            reader.endObject();
 
-            value = map;
-        } else if (jsonToken == JsonToken.BOOLEAN) {
-            value = reader.nextBoolean();
-        } else if (jsonToken == JsonToken.NUMBER) {
-            value = reader.nextInt();
-        } else if (jsonToken == JsonToken.STRING) {
-            value = reader.nextString();
-        }
-
-        if(invokeListeners) {
-            return invokeListenersOnValue(value, null);
-        } else {
-            return value;
+        } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
     }
 
-    public Map readRefMap() throws IOException {
-        HashMap map = new HashMap();
-
-        reader.beginObject();
-
-        String name = reader.nextName();
-        String typeClassName = reader.nextString();
-        Class beanClass = ReflectionUtils.getClass(typeClassName);
-
-
-        if (beanClass != null) {
-            name = reader.nextName();
+    public Map readRefMap() throws ObjectReadException {
+        try {
+            HashMap map = new HashMap();
 
             reader.beginObject();
-            while (reader.hasNext()) {
-                String key = reader.nextName();
-                map.put(key, readValue(beanClass));
+
+            String name = reader.nextName();
+            String typeClassName = reader.nextString();
+            Class beanClass = ReflectionUtils.getClass(typeClassName);
+
+
+            if (beanClass != null) {
+                name = reader.nextName();
+
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String key = reader.nextName();
+                    map.put(key, readValue(beanClass));
+                }
+                reader.endObject();
+
             }
             reader.endObject();
 
+            return map;
+
+        } catch (IOException e) {
+            throw new ObjectReadException(e);
         }
-        reader.endObject();
-
-        return map;
-
     }
 
     public List<ObjectReadListener> getObjectReadListeners() {

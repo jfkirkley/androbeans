@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.androware.androbeans.beans.Flow;
+import org.androware.androbeans.beans.Top;
 import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ResourceUtils;
 import org.androware.androbeans.utils.Utils;
@@ -33,19 +34,33 @@ public class MainActivity extends Activity {
         ResourceUtils.R = R.class;
         FilterLog.inst().activateTag(TAG);
 
+        MapObjectReader mapObjectReader = new MapObjectReader(Top.makeTextMap(), Top.class);
+
         try {
-            JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_flow", "raw"), Flow.class);
-            jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
-            Flow flow = (Flow) jsonObjectReader.read();
+            Top top = (Top) mapObjectReader.read();
+            l("tp" + top.toString());
+        } catch (ObjectReadException e) {
+            e.printStackTrace();
+        }
 
-            l(flow.toStringTest());
 
-            FileOutputStream fos = Utils.getExternalFileOutputStream(this, null, "", "bout.txt");
-            JsonObjectWriter jsonObjectWriter = new JsonObjectWriter(fos);
-            jsonObjectWriter.write(flow);
-            jsonObjectWriter.close();
-        } catch( IOException e) {
+        if (false) {
+            try {
+                JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_flow", "raw"), Flow.class);
+                jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
+                Flow flow = (Flow) jsonObjectReader.read();
 
+                l(flow.toStringTest());
+
+                FileOutputStream fos = Utils.getExternalFileOutputStream(this, null, "", "bout.txt");
+                JsonObjectWriter jsonObjectWriter = new JsonObjectWriter(fos);
+                jsonObjectWriter.write(flow);
+                jsonObjectWriter.close();
+
+            } catch (IOException e) {
+            } catch (ObjectReadException e) {
+
+            }
         }
     }
 
