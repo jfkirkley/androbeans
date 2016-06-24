@@ -3,6 +3,8 @@ package org.androware.androbeans;
 import android.util.JsonWriter;
 
 
+import org.androware.androbeans.utils.FilterLog;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -17,6 +19,15 @@ import java.util.Map;
  */
 public class JsonObjectWriter implements ObjectWriter {
     JsonWriter writer;
+    public final static String TAG = "jsonwrite";
+
+    public void l(String s) {
+        FilterLog.inst().log(TAG, s);
+    }
+
+    public void l(String tag, String s) {
+        FilterLog.inst().log(tag, s);
+    }
 
     public JsonObjectWriter(OutputStream out) throws IOException {
         writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
@@ -43,9 +54,13 @@ public class JsonObjectWriter implements ObjectWriter {
                 String fieldName = f.getName();
                 Class fieldType = f.getType();
 
-                writer.name(fieldName);
-
-                writeValue(fieldType, f.get(object));
+                Object value = f.get(object);
+                if(value != null) {
+                    writer.name(fieldName);
+                    writeValue(fieldType, value);
+                } else {
+                    l("field: " + fieldName + " is null.");
+                }
             }
             writer.endObject();
 

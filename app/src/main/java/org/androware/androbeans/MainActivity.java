@@ -10,10 +10,6 @@ import org.androware.androbeans.beans.Flow;
 import org.androware.androbeans.beans.Top;
 import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ResourceUtils;
-import org.androware.androbeans.utils.Utils;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 public class MainActivity extends Activity {
     public final static String TAG = "main";
@@ -33,35 +29,24 @@ public class MainActivity extends Activity {
 
         ResourceUtils.R = R.class;
         FilterLog.inst().activateTag(TAG);
-
-        MapObjectReader mapObjectReader = new MapObjectReader(Top.makeTextMap(), Top.class);
+        FilterLog.inst().activateTag(JsonObjectWriter.TAG);
 
         try {
-            Top top = (Top) mapObjectReader.read();
-            l("tp" + top.toString());
+            Top top = (Top) ObjectReaderFactory.getInstance(this).makeAndRunMapReader(Top.makeTextMap(), Top.class);
+
+            l(top.toString());
+
+            Flow flow = (Flow) ObjectReaderFactory.getInstance().makeAndRunLinkedJsonReader("test_merge", Flow.class);
+
+            l(flow.toStringTest());
+
+            ObjectWriterFactory.getInstance(this).writeJsonObjectToExternalFile("xyz.js", flow);
+
+
         } catch (ObjectReadException e) {
-            e.printStackTrace();
+        } catch (ObjectWriteException e) {
         }
 
-
-        if (false) {
-            try {
-                JsonObjectReader jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_flow", "raw"), Flow.class);
-                jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
-                Flow flow = (Flow) jsonObjectReader.read();
-
-                l(flow.toStringTest());
-
-                FileOutputStream fos = Utils.getExternalFileOutputStream(this, null, "", "bout.txt");
-                JsonObjectWriter jsonObjectWriter = new JsonObjectWriter(fos);
-                jsonObjectWriter.write(flow);
-                jsonObjectWriter.close();
-
-            } catch (IOException e) {
-            } catch (ObjectReadException e) {
-
-            }
-        }
     }
 
     @Override
