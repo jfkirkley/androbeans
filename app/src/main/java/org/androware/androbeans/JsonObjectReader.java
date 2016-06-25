@@ -102,11 +102,7 @@ public class JsonObjectReader implements ObjectReader {
 
     @Override
     public Object nextValue() throws ObjectReadException {
-        // try {
         return readAnyObject(false);
-//        } catch (IOException e) {
-        //           throw new ObjectReadException(e);
-        //      }
     }
 
     @Override
@@ -188,7 +184,7 @@ public class JsonObjectReader implements ObjectReader {
             } else if (List.class.isAssignableFrom(fieldType)) {
                 value = readList(field);
             } else {
-                value = (new JsonObjectReader(reader, fieldType, this)).read();
+                value = readObject(fieldType);
             }
             return value;
         } catch (IOException e) {
@@ -275,6 +271,14 @@ public class JsonObjectReader implements ObjectReader {
 
     public Object readAnyObject() throws ObjectReadException {
         return readAnyObject(true);
+    }
+
+    public Object readObject(Class fieldType)  throws ObjectReadException {
+        if(fieldType == Object.class) {
+            return readAnyObject();
+        } else {
+            return (new JsonObjectReader(reader, fieldType, this)).read();
+        }
     }
 
     public Object readAnyObject(boolean invokeListeners) throws ObjectReadException {
