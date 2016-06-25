@@ -1,19 +1,14 @@
 package org.androware.androbeans.utils;
 
-import android.util.JsonReader;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.Map;
 
-import org.androware.androbeans.legacy.InstaBean;
-import org.androware.androbeans.legacy.JSONinstaBean;
 
 /**
  * Created by jkirkley on 6/9/16.
  */
-public class ConstructorSpec extends JSONinstaBean {
+public class ConstructorSpec  {
 
     public List<String> paramClassNames;
     public Object [] paramObjects;
@@ -22,13 +17,11 @@ public class ConstructorSpec extends JSONinstaBean {
     protected Class [] paramClasses;
     protected Class targetClass;
 
-    public ConstructorSpec(Class targetClass) {
-        this.targetClass = targetClass;
+    public ConstructorSpec() {
     }
 
-    public ConstructorSpec(Map map, Class type, InstaBean parent) {
-        super(map, type, parent);
-        init();
+    public ConstructorSpec(Class targetClass) {
+        this.targetClass = targetClass;
     }
 
     public ConstructorSpec(Class targetClass, Class [] paramClasses,  Object ... paramObjects) {
@@ -41,12 +34,7 @@ public class ConstructorSpec extends JSONinstaBean {
         this(targetClass, paramClasses, null);
     }
 
-    public ConstructorSpec(JsonReader reader, Class type, InstaBean parent) throws IOException {
-        super(reader, type, parent);
-        init();
-    }
-
-    private void init() {
+    private void __init__() {
         targetClass = ReflectionUtils.getClass(targetClassName);
         if(paramClassNames != null) {
             paramClasses = new Class[paramClassNames.size()];
@@ -55,10 +43,6 @@ public class ConstructorSpec extends JSONinstaBean {
                 paramClasses[i++] = ReflectionUtils.getClass(className);
             }
         }
-    }
-
-    public ConstructorSpec(JsonReader reader, Class type) throws IOException {
-        this(reader, type, null);
     }
 
     public Class[] getParamClasses() {
