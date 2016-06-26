@@ -14,7 +14,7 @@ import java.util.Map;
  * Created by jkirkley on 6/22/16.
  */
 public class MapObjectReader implements ObjectReader {
-
+    List<ObjectReadListener> objectReadListeners = new ArrayList<>();
     Map map;
     Object target;
     Class type;
@@ -52,6 +52,9 @@ public class MapObjectReader implements ObjectReader {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
+
+        invokeListenersOnReadDone(target);
+
         return target;
     }
 
@@ -129,6 +132,12 @@ public class MapObjectReader implements ObjectReader {
         }
     }
 
+    protected void invokeListenersOnReadDone(Object value) throws ObjectReadException {
+        for (ObjectReadListener objectReadListener : objectReadListeners) {
+            objectReadListener.onReadDone(value, this);
+        }
+    }
+
     @Override
     public String nextFieldName() throws ObjectReadException {
         return null;
@@ -162,5 +171,15 @@ public class MapObjectReader implements ObjectReader {
     @Override
     public void removeOjectReadListener(ObjectReadListener objectReadListener) {
 
+    }
+
+    @Override
+    public List<ObjectReadListener> getObjectReadListeners() {
+        return null;
+    }
+
+    @Override
+    public void setObjectReadListeners(List<ObjectReadListener> objectReadListeners) {
+        this.objectReadListeners = objectReadListeners;
     }
 }

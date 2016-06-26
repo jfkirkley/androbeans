@@ -32,13 +32,33 @@ public class ObjectReaderFactory {
         this.activity = activity;
     }
 
-    public MapObjectReader makeMapReader(Map map, Class type) throws ObjectReadException {
-        return new MapObjectReader(map, type);
-    }
-    public Object makeAndRunMapReader(Map map, Class type) throws ObjectReadException {
+    public MapObjectReader makeMapReader(Map map, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
+        MapObjectReader mapObjectReader = new MapObjectReader(map, type);
+        if( objectReadListeners != null) {
+            mapObjectReader.setObjectReadListeners(objectReadListeners);
+        }
 
-        MapObjectReader mapObjectReader = makeMapReader(map, type);
+        return mapObjectReader;
+    }
+
+    public MapObjectReader makeMapReader(Map map, Class type) throws ObjectReadException {
+        return makeMapReader(map, type, null);
+    }
+
+    public Object makeAndRunMapReader(Map map, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
+
+        MapObjectReader mapObjectReader = makeMapReader(map, type, objectReadListeners);
         return mapObjectReader.read();
+    }
+
+    public Object makeAndRunMapReader(Map map, Class type) throws ObjectReadException {
+        return makeAndRunMapReader(map, type, null);
+    }
+
+    public Object makeAndRunInitializingMapReader(Map map, Class type) throws ObjectReadException {
+        List<ObjectReadListener> objectReadListeners = new ArrayList<>();
+        objectReadListeners.add(new InitializingReadListener());
+        return makeAndRunMapReader(map, type, objectReadListeners);
     }
 
     public JsonObjectReader makeJsonReader(String resourceName, String resourceGroup, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {

@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Created by jkirkley on 6/18/16.
  */
-public class LinkObjectReadListener implements ObjectReadListener {
+public class LinkObjectReadListener extends InitializingReadListener {
 
     public static final String REFMAP_PREFIX = "__refmap__";
     public static final String IDREF_PREFIX = "__idref__";
@@ -77,20 +77,21 @@ public class LinkObjectReadListener implements ObjectReadListener {
 
     @Override
     public Object onValue(Object value, Field field, ObjectReader objectReader) throws ObjectReadException {
+        if(value instanceof String && ((String)value).startsWith(IDREF_PREFIX)) {
+            return (new BeanRef((String)value)).getBean();
+        }
         return value;
     }
 
     @Override
     public Object onReadDone(Object value, ObjectReader objectReader) {
+        super.onReadDone(value, objectReader);
+
         if (pendingMergeMap.containsKey(objectReader)) {
             BeanRef beanRef = pendingMergeMap.get(objectReader);
             merge(value, beanRef.getBean());
         }
 
-        if(ReflectionUtils.hasMethod(value.getClass(), DEFAULT_POST_INIT_METHOD)){
-            Method initMethod = ReflectionUtils.getMethod(value.getClass(), DEFAULT_POST_INIT_METHOD);
-            ReflectionUtils.callMethod(value, initMethod);
-        }
         return null;
     }
 

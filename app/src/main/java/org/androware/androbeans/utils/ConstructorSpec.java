@@ -34,7 +34,7 @@ public class ConstructorSpec  {
         this(targetClass, paramClasses, null);
     }
 
-    private void __init__() {
+    public void __init__() {
         targetClass = ReflectionUtils.getClass(targetClassName);
         if(paramClassNames != null) {
             paramClasses = new Class[paramClassNames.size()];
