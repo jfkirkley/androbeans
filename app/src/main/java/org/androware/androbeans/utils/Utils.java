@@ -82,7 +82,7 @@ public class Utils {
     */
 
 
-    public boolean deviceIsOnline(Context context) {
+    public static boolean deviceIsOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
         if (ni == null) {
