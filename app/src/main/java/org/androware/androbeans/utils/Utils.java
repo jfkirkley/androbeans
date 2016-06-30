@@ -1,7 +1,8 @@
 package org.androware.androbeans.utils;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.widget.Toast;
-
 
 
 import android.app.Activity;
@@ -79,6 +80,18 @@ public class Utils {
             return buf.toString();
         }
     */
+
+
+    public boolean deviceIsOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        if (ni == null) {
+            // There are no active networks.
+            return false;
+        }
+        return ni.isConnected();
+    }
+
     public static <T> T[] concat(T[] first, T[] second) {
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
@@ -117,7 +130,7 @@ public class Utils {
             Field listenerField = null;
             listenerField = Class.forName("android.view.View$ListenerInfo").getDeclaredField(listenerType);//"mOnClickListener");
             if (listenerField != null && myLiObject != null) {
-                 listenerField.setAccessible(true);
+                listenerField.setAccessible(true);
                 return listenerField.get(myLiObject);
             }
 
@@ -146,7 +159,7 @@ public class Utils {
     }
 
     public static ListView getAndSetListView(String[] listItems, String name, Activity activity, int listItemLayoutId) {
-        ListView listView = (ListView) activity.findViewById(ResourceUtils.getResId( "id", name ));
+        ListView listView = (ListView) activity.findViewById(ResourceUtils.getResId("id", name));
 
         listView.setAdapter(new ArrayAdapter<String>(activity, listItemLayoutId, listItems));
 
@@ -157,7 +170,7 @@ public class Utils {
         return new File(activity.getFilesDir(), path + fileName);
     }
 
-    public static FileOutputStream getExternalFileOutputStream(Activity activity, String type, String path, String fileName) throws  IOException {
+    public static FileOutputStream getExternalFileOutputStream(Activity activity, String type, String path, String fileName) throws IOException {
         File file = getExternalFile(activity, type, path, fileName);
         return new FileOutputStream(file);
     }
@@ -239,7 +252,7 @@ public class Utils {
             if (Parcelable.class.isAssignableFrom(type)) {
                 intent.putExtra(k, (Parcelable) v);
             } else if (Serializable.class.isAssignableFrom(type)) {
-                intent.putExtra(k, (Serializable)v);
+                intent.putExtra(k, (Serializable) v);
             } else if (Integer.class.isAssignableFrom(type)) {
                 //Log.d("util", k + " --------------------- -> " + v);
                 intent.putExtra(k, (int) v);
@@ -280,14 +293,14 @@ public class Utils {
 
     public static Set makeSet(Object... members) {
         HashSet hashSet = new HashSet();
-        for(Object obect: members) {
+        for (Object obect : members) {
             hashSet.add(obect);
         }
         return hashSet;
     }
 
     public static boolean isPrimitiveOrString(Object object) {
-        if(object != null) {
+        if (object != null) {
             Class cls = object.getClass();
             return cls.isPrimitive() || cls == String.class || cls == Integer.class ||
                     cls == Boolean.class || cls == Long.class || cls == Character.class ||
@@ -305,11 +318,9 @@ public class Utils {
     }
 
 
-
-
     public static int getResIdFromExtra(Intent intent, String name, String groupName) {
         Bundle extras = intent.getExtras();
-         return ResourceUtils.getResId(groupName, getExtraString(extras, name));
+        return ResourceUtils.getResId(groupName, getExtraString(extras, name));
     }
 
     public static String getStringFromExtra(Intent intent, String name) {
@@ -369,7 +380,6 @@ public class Utils {
         });
 
     }
-
 
 
 }
