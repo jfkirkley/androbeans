@@ -126,6 +126,21 @@ public class ReflectionUtils {
     }
 
 
+    public static Method getMethodFromArgs(Class c, String methodName, Object... args) {
+
+        try {
+            Class[] classes = new Class[args.length];
+            int i = 0;
+            for(Object arg: args) {
+                classes[++i] = arg.getClass();
+            }
+            return c.getMethod(methodName, classes);
+        } catch (NoSuchMethodException e) {
+        }
+        return null;
+    }
+
+
     public static Method getMethod(Class c, String methodName, Class... paramTypes) {
 
         try {
@@ -138,6 +153,18 @@ public class ReflectionUtils {
     public static Object callMethod(Object target, Method method, Object... args) {
 
         try {
+            return method.invoke(target, args);
+        } catch (InvocationTargetException e) {
+            // TODO handle this properly
+        } catch (IllegalAccessException e) {
+        }
+        return null;
+    }
+
+    public static Object callMethod(Object target, String methodName, Object... args) {
+
+        try {
+            Method method = getMethodFromArgs(target.getClass(), methodName, args);
             return method.invoke(target, args);
         } catch (InvocationTargetException e) {
             // TODO handle this properly
