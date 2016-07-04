@@ -132,7 +132,7 @@ public class ReflectionUtils {
             Class[] classes = new Class[args.length];
             int i = 0;
             for(Object arg: args) {
-                classes[++i] = arg.getClass();
+                classes[i++] = arg.getClass();
             }
             return c.getMethod(methodName, classes);
         } catch (NoSuchMethodException e) {
