@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class ObjectReaderFactory {
     private static ObjectReaderFactory ourInstance = null;
-    Activity activity;
+    public Activity activity;
 
     public static ObjectReaderFactory getInstance() {
         return getInstance(null);
@@ -23,6 +23,9 @@ public class ObjectReaderFactory {
 
     public static ObjectReaderFactory getInstance(Activity activity) {
         if(ourInstance == null){
+            if(activity == null) {
+                throw new IllegalArgumentException("Must intialize ObjectReaderFactory with an activity reference. ");
+            }
             ourInstance = new ObjectReaderFactory(activity);
         }
         return ourInstance;
