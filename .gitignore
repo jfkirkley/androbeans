@@ -13,6 +13,7 @@
 \.idea/
 #\.idea/*/**
 node_modules
+app/build
 Android
 platforms
 tns_modules
