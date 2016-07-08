@@ -42,6 +42,9 @@ public class ConstructorSpec  {
             for (String className : paramClassNames) {
                 paramClasses[i++] = ReflectionUtils.getClass(className);
             }
+            if(paramObjects == null) {
+                paramObjects = new Object[paramClasses.length];
+            }
         }
     }
 
