@@ -8,15 +8,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jkirkley on 5/21/16.
  */
 public class ReflectionUtils {
 
+    public static Map<String, Class> name2primitiveClassMap = new HashMap<>();
+    static {
+        name2primitiveClassMap.put("int", int.class);
+        name2primitiveClassMap.put("long", long.class);
+        name2primitiveClassMap.put("byte", byte.class);
+        name2primitiveClassMap.put("float", float.class);
+        name2primitiveClassMap.put("double", double.class);
+        name2primitiveClassMap.put("boolean", boolean.class);
+        name2primitiveClassMap.put("short", short.class);
+        name2primitiveClassMap.put("char", char.class);
+    }
+
     public static Class getClass(String className) {
         try {
+            if(name2primitiveClassMap.containsKey(className)) {
+                return name2primitiveClassMap.get(className);
+            }
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
         }
