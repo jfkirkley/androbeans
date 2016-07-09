@@ -12,10 +12,14 @@ public class ResourceUtils {
 
     public static Class R = null;
 
-    public static int getResId(String groupName, String resName) {
-        Class group = getResourceGroup(groupName);
+    public static int getResId(String groupName, String resName, Class resourceClass) {
+        Class group = getResourceGroup(groupName, resourceClass);
         Integer idValue = (Integer)ReflectionUtils.getStaticDeclaredFieldValue(group, resName);
         return idValue.intValue();
+    }
+
+    public static int getResId(String groupName, String resName) {
+        return getResId(groupName, resName, R);
     }
 
     public static InputStream getResourceInputStream(Activity activity, String resourceName, String groupName) {
@@ -30,11 +34,15 @@ public class ResourceUtils {
         return getResId("id", viewId);
     }
 
-    public static Class getResourceGroup(String name) {
+    public static Class getResourceGroup(String name, Class resourceClass) {
         if(R == null) {
             throw new Error("You must initialize R with the correct android resouce class.");
         }
-        return ReflectionUtils.getInnerClass(R, name);
+        return ReflectionUtils.getInnerClass(resourceClass, name);
+    }
+
+    public static Class getResourceGroup(String name) {
+        return getResourceGroup(name, R);
     }
 
     public static int getLayoutId( String resName ) {
@@ -91,6 +99,22 @@ public class ResourceUtils {
 
     public static Class getLayoutLand() {
         return getResourceGroup("layout-land");
+    }
+
+
+    public static int getResourceIdFromDotName(String dotName) {
+        String tks [] = dotName.split(".");
+
+        if( tks.length == 3 && tks[0].equals("R") ) {
+
+            return getResId(tks[1], tks[2]);
+
+        } else if(tks.length == 4 && tks[0].equals("android") && tks[1].equals("R") ) {
+
+            return getResId(tks[2], tks[3], android.R.class);
+
+        }
+        throw new IllegalArgumentException("Dotname '" + dotName + "' is not a valid resource path.");
     }
 
 }
