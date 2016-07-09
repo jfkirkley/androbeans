@@ -44,6 +44,31 @@ public class ConstructorSpec  {
             }
             if(paramObjects == null) {
                 paramObjects = new Object[paramClasses.length];
+            } else {
+
+                // try to resolve refs
+                // TODO need to factor this properly
+                for( i = 0; i < paramObjects.length; ++i ) {
+                    Object object = paramObjects[i];
+
+                    if (!paramClasses[i].isAssignableFrom(object.getClass())) {
+
+                        if (object instanceof String) {
+                            String s = (String) object;
+                            if (s.indexOf('.') != -1) {
+                                try {
+                                    int resId = ResourceUtils.getResourceIdFromDotName(s);
+                                    paramObjects[i] = resId;
+                                } catch (IllegalArgumentException e) {
+                                    // ignore
+                                }
+                            }
+                        }
+                        if (!paramClasses[i].isAssignableFrom(paramObjects[i].getClass()) ) {
+                            throw new IllegalArgumentException("param " + i + " = " + object + " not of correct type.");
+                        }
+                    }
+                }
             }
         }
     }
