@@ -103,7 +103,7 @@ public class ResourceUtils {
 
 
     public static int getResourceIdFromDotName(String dotName) {
-        String tks [] = dotName.split(".");
+        String tks [] = dotName.split("\\.");
 
         if( tks.length == 3 && tks[0].equals("R") ) {
 
