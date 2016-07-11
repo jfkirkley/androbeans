@@ -187,10 +187,10 @@ public class LinkObjectReadListener extends InitializingReadListener {
             Object myMapVal = myMap.get(k);
 
             if (myMapVal != null) {
-                if (!Utils.isPrimitiveOrString(myMapVal)) {
-                    mergeObject(myMapVal, otherMapVal);
-                } else if (myMapVal instanceof Map) {
+                if (myMapVal instanceof Map) {
                     mergeMap((Map) myMapVal, (Map) otherMapVal);
+                } else if (!Utils.isPrimitiveOrString(myMapVal)) {
+                    mergeObject(myMapVal, otherMapVal);
                 }
             } else {
                 myMap.put(k, otherMapVal);
