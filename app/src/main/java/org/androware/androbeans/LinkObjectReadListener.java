@@ -136,7 +136,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
     public void merge(Object thisBean, Object thatBean) {
         if (Map.class.isAssignableFrom(thisBean.getClass())) {
 
-            mergeMap((Map) thatBean, (Map) thatBean);
+            mergeMap((Map) thisBean, (Map) thatBean);
 
         } else {
 
