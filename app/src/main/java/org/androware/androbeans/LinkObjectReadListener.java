@@ -26,7 +26,8 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
     private HashMap<String, Map> refMap = new HashMap<>();
     private HashMap<String, Object> idMap = new HashMap<>();
-    private HashMap<ObjectReader, BeanRef> pendingMergeMap = new HashMap<>();
+    //private HashMap<ObjectReader, Stack<BeanRef>> pendingMergeMap = new HashMap<>();
+    private HashMap<Object, BeanRef> pendingMergeMap = new HashMap<>();
     private HashMap<Class, Class> typeOverrides = new HashMap<>();
 
 
@@ -61,24 +62,34 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
 
     @Override
-    public void onFieldName(String fieldName, Field field, ObjectReader objectReader) throws ObjectReadException {
+    public void onFieldName(String fieldName, Field field, Object target, ObjectReader objectReader) throws ObjectReadException {
         if (fieldName.startsWith(REFMAP_PREFIX)) {
 
             refMap.put(fieldName.substring(REFMAP_PREFIX.length()), objectReader.readRefMap());
 
         } else if (fieldName.equals(BEAN_ID)) {
+
             String id = (String) objectReader.nextValue();
-            idMap.put(id, objectReader.getTarget());
+            idMap.put(id, target);
 
         } else if (fieldName.equals(MERGE_PREFIX)) {
-            pendingMergeMap.put(objectReader, new BeanRef((String) objectReader.nextValue()));
+
+            pendingMergeMap.put(target, new BeanRef((String) objectReader.nextValue()));
+
+            /*
+            try {
+                Utils.addValueToMappedContainer(this.getClass().getField("pendingMergeMap"), pendingMergeMap, objectReader, new BeanRef((String) objectReader.nextValue()));
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+            */
         }
     }
 
     @Override
     public Object onValue(Object value, Field field, ObjectReader objectReader) throws ObjectReadException {
-        if(value instanceof String && ((String)value).startsWith(IDREF_PREFIX)) {
-            return (new BeanRef((String)value)).getBean();
+        if (value instanceof String && ((String) value).startsWith(IDREF_PREFIX)) {
+            return (new BeanRef((String) value)).getBean();
         }
         return value;
     }
@@ -87,9 +98,18 @@ public class LinkObjectReadListener extends InitializingReadListener {
     public Object onReadDone(Object value, ObjectReader objectReader) {
         super.onReadDone(value, objectReader);
 
-        if (pendingMergeMap.containsKey(objectReader)) {
-            BeanRef beanRef = pendingMergeMap.get(objectReader);
+        if (pendingMergeMap.containsKey(value)) {
+
+            BeanRef beanRef = pendingMergeMap.get(value);
             merge(value, beanRef.getBean());
+
+            /*
+            Stack<BeanRef> beanRefStack = pendingMergeMap.get(objectReader);
+            while(!beanRefStack.empty()) {
+                BeanRef beanRef = beanRefStack.pop();
+                mergeObject(value, beanRef.getBean());
+            }
+            */
         }
 
         return null;
@@ -97,7 +117,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
     @Override
     public Object onCreate(Class type, ObjectReader objectReader) {
-        if(typeOverrides.containsKey(type)) {
+        if (typeOverrides.containsKey(type)) {
             Class overrideType = typeOverrides.get(type);
             return ReflectionUtils.newInstance(overrideType);
         }
@@ -107,13 +127,25 @@ public class LinkObjectReadListener extends InitializingReadListener {
     @Override
     public void onPostCreate(Object newObject, ObjectReader objectReader) {
         Method method = ReflectionUtils.getMethod(newObject.getClass(), DEFAULT_TYPE_OVERRIDE_METHOD, Map.class);
-        if( method != null ) {
+        if (method != null) {
             ReflectionUtils.callMethod(newObject, method, typeOverrides);
         }
 
     }
 
     public void merge(Object thisBean, Object thatBean) {
+        if (Map.class.isAssignableFrom(thisBean.getClass())) {
+
+            mergeMap((Map) thatBean, (Map) thatBean);
+
+        } else {
+
+            mergeObject(thisBean, thatBean);
+        }
+
+    }
+
+    public void mergeObject(Object thisBean, Object thatBean) {
         Class type = thisBean.getClass();
 
         Field fields[] = type.getFields();
@@ -140,7 +172,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
                         mergeMap((Map) myVal, (Map) otherVal);
 
                     } else if (!Utils.isPrimitiveOrString(myVal)) {
-                        merge(myVal, otherVal);
+                        mergeObject(myVal, otherVal);
                     }
                 }
 
@@ -156,7 +188,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
             if (myMapVal != null) {
                 if (!Utils.isPrimitiveOrString(myMapVal)) {
-                    merge(myMapVal, otherMapVal);
+                    mergeObject(myMapVal, otherMapVal);
                 } else if (myMapVal instanceof Map) {
                     mergeMap((Map) myMapVal, (Map) otherMapVal);
                 }

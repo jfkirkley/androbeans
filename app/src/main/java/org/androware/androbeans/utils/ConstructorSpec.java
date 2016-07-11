@@ -73,7 +73,8 @@ public class ConstructorSpec  {
                                 }
                             }
                         }
-                        if (!paramClasses[i].isAssignableFrom(paramObjects[i].getClass()) ) {
+
+                        if (!ReflectionUtils.isAssignable(paramClasses[i], paramObjects[i].getClass()) ) {
                             throw new IllegalArgumentException("param " + i + " = " + object + " not of correct type.");
                         }
                     }

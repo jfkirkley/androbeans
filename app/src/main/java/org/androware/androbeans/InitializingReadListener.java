@@ -13,7 +13,7 @@ public class InitializingReadListener implements ObjectReadListener {
     public static final String DEFAULT_POST_INIT_METHOD = "__init__";
 
     @Override
-    public void onFieldName(String fieldName, Field field, ObjectReader objectReader) throws ObjectReadException {
+    public void onFieldName(String fieldName, Field field, Object target, ObjectReader objectReader) throws ObjectReadException {
 
     }
 

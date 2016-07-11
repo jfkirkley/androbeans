@@ -40,6 +40,20 @@ public class ReflectionUtils {
         return null;
     }
 
+    public static boolean isAssignable(Class a, Class b) {
+        if(a.isPrimitive() || b.isPrimitive()) {
+            if(a.isPrimitive() && b.isPrimitive()) {
+                return a == b;
+            } else if(a.isPrimitive()) {
+                return a == getStaticFieldValue(b, "TYPE");
+            } else {
+                return b == getStaticFieldValue(a, "TYPE");
+            }
+        }
+        return a.isAssignableFrom(b);
+    }
+
+
     public static Object getFieldValue(Field field, Object target) {
         try {
             return field.get(target);

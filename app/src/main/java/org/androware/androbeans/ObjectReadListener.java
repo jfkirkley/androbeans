@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
  */
 public interface ObjectReadListener {
 
-    public void onFieldName(String fieldName, Field field, ObjectReader objectReader) throws ObjectReadException;
+    public void onFieldName(String fieldName, Field field, Object value, ObjectReader objectReader) throws ObjectReadException;
     public Object onValue(Object value, Field field, ObjectReader objectReader) throws ObjectReadException;
     public Object onReadDone(Object value, ObjectReader objectReader);
     public Object onCreate(Class type, ObjectReader objectReader);

@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -383,5 +384,22 @@ public class Utils {
 
     public static String upCaseFirstLetter(String s) {
         return s.substring(0,1).toUpperCase() + s.substring(1);
+    }
+
+    public static <K, C> void addToContainerValue(Map<K, C> map,  K key, Object value) {
+        if(!map.containsKey(key)) {
+            //  TODO can this be done??? C container = ReflectionUtils.newInstance(C);
+        }
+    }
+
+    public static void addValueToMappedContainer(Field mapField, Map map,  Object key, Object value) {
+        if(!map.containsKey(key)) {
+            Class containerType = ReflectionUtils.getGenericType(mapField, 1);
+            if(Collection.class.isAssignableFrom(containerType)) {
+                Collection collection = (Collection)ReflectionUtils.newInstance(containerType);
+                collection.add(value);
+                map.put(key, collection);
+            }
+        }
     }
 }

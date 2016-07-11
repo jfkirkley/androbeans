@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.R.attr.name;
+
 /**
  * Created by jkirkley on 6/17/16.
  */
@@ -122,8 +124,12 @@ public class JsonObjectReader implements ObjectReader {
     }
 
     protected void invokeListenersOnFieldName(String fieldName, Field field) throws ObjectReadException {
+        invokeListenersOnFieldName(fieldName, field, target);
+    }
+
+    protected void invokeListenersOnFieldName(String fieldName, Field field, Object theTarget) throws ObjectReadException {
         for (ObjectReadListener objectReadListener : objectReadListeners) {
-            objectReadListener.onFieldName(fieldName, field, this);
+            objectReadListener.onFieldName(fieldName, field, theTarget, this);
         }
     }
 
@@ -306,11 +312,15 @@ public class JsonObjectReader implements ObjectReader {
                 while (reader.hasNext()) {
                     String name = reader.nextName();
 
+                    if(invokeListeners) invokeListenersOnFieldName(name, null, map);
+
                     map.put(name, readAnyObject());
                 }
                 reader.endObject();
-
                 value = map;
+
+                if(invokeListeners) invokeListenersOnReadDone(value);
+
             } else if (jsonToken == JsonToken.BOOLEAN) {
                 value = reader.nextBoolean();
             } else if (jsonToken == JsonToken.NUMBER) {
