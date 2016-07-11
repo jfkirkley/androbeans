@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
         ResourceUtils.R = R.class;
 
         FilterLog.inst().activateTag(TAG);
-        FilterLog.inst().activateTag(JSONinstaBean.TAG);
+        FilterLog.inst().activateTag(JsonObjectReader.TAG);
 
         try {
             JsonObjectReader jsonObjectReader =  new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_merge", "raw"), Flow.class);

@@ -1,6 +1,7 @@
 package org.androware.androbeans;
 
 
+import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ReflectionUtils;
 import org.androware.androbeans.utils.Utils;
 

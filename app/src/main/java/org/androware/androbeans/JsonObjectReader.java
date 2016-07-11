@@ -3,6 +3,7 @@ package org.androware.androbeans;
 import android.util.JsonReader;
 import android.util.JsonToken;
 
+import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ReflectionUtils;
 
 import java.io.IOException;
@@ -27,6 +28,12 @@ public class JsonObjectReader implements ObjectReader {
 
     Class type;
     Object target;
+
+    public static final String TAG = "jsonread";
+
+    public void l(String s) {
+        FilterLog.inst().log(TAG, s);
+    }
 
     public JsonObjectReader(JsonReader reader, Class type) throws ObjectReadException {
         this(reader, type, null);
@@ -298,7 +305,7 @@ public class JsonObjectReader implements ObjectReader {
 
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    list.add(readAnyObject());
+                    list.add(readAnyObject(invokeListeners));
                 }
                 reader.endArray();
 
@@ -307,17 +314,21 @@ public class JsonObjectReader implements ObjectReader {
             } else if (jsonToken == JsonToken.BEGIN_OBJECT) {
 
                 Map map = new HashMap();
+                l("make map: " + map.hashCode());
 
                 reader.beginObject();
                 while (reader.hasNext()) {
                     String name = reader.nextName();
+                    l("read name: " + name);
 
                     if(invokeListeners) invokeListenersOnFieldName(name, null, map);
 
-                    map.put(name, readAnyObject());
+                    map.put(name, readAnyObject(invokeListeners));
                 }
                 reader.endObject();
                 value = map;
+
+                l("done map: " + map.hashCode());
 
                 if(invokeListeners) invokeListenersOnReadDone(value);
 
