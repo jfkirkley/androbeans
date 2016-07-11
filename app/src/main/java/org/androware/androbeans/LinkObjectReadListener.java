@@ -63,7 +63,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
 
     @Override
-    public void onFieldName(String fieldName, Field field, Object target, ObjectReader objectReader) throws ObjectReadException {
+    public void onFieldName(String fieldName, Field field, Object target, Object objId, ObjectReader objectReader) throws ObjectReadException {
         if (fieldName.startsWith(REFMAP_PREFIX)) {
 
             refMap.put(fieldName.substring(REFMAP_PREFIX.length()), objectReader.readRefMap());
@@ -75,7 +75,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
         } else if (fieldName.equals(MERGE_PREFIX)) {
 
-            pendingMergeMap.put(target, new BeanRef((String) objectReader.nextValue()));
+            pendingMergeMap.put(objId, new BeanRef((String) objectReader.nextValue()));
 
             /*
             try {
@@ -96,12 +96,12 @@ public class LinkObjectReadListener extends InitializingReadListener {
     }
 
     @Override
-    public Object onReadDone(Object value, ObjectReader objectReader) {
-        super.onReadDone(value, objectReader);
+    public Object onReadDone(Object value, Object id, ObjectReader objectReader) {
+        super.onReadDone(value, id, objectReader);
 
-        if (pendingMergeMap.containsKey(value)) {
+        if (pendingMergeMap.containsKey(id)) {
 
-            BeanRef beanRef = pendingMergeMap.get(value);
+            BeanRef beanRef = pendingMergeMap.get(id);
             merge(value, beanRef.getBean());
 
             /*

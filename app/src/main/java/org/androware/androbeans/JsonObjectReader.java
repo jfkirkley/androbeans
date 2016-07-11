@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static android.R.attr.name;
 
@@ -71,19 +72,19 @@ public class JsonObjectReader implements ObjectReader {
 
     @Override
     public Object read() throws ObjectReadException {
+        UUID targetUUID = UUID.randomUUID();
 
         try {
-
             reader.beginObject();
             while (reader.hasNext()) {
 
                 String fieldName = reader.nextName();
                 try {
                     Field field = type.getField(fieldName);
-                    invokeListenersOnFieldName(fieldName, field);
+                    invokeListenersOnFieldName(fieldName, field, targetUUID);
                     field.set(target, readValueAndInvokeListeners(field));
                 } catch (NoSuchFieldException e) {
-                    invokeListenersOnFieldName(fieldName, null);
+                    invokeListenersOnFieldName(fieldName, null, targetUUID);
                 }
 
             }
@@ -95,7 +96,7 @@ public class JsonObjectReader implements ObjectReader {
             // TODO log exceptions
         }
 
-        invokeListenersOnReadDone(target);
+        invokeListenersOnReadDone(target, targetUUID);
 
         return target;
     }
@@ -124,19 +125,19 @@ public class JsonObjectReader implements ObjectReader {
         objectReadListeners.remove(objectReadListener);
     }
 
-    protected void invokeListenersOnReadDone(Object value) throws ObjectReadException {
+    protected void invokeListenersOnReadDone(Object value, Object id) throws ObjectReadException {
         for (ObjectReadListener objectReadListener : objectReadListeners) {
-            objectReadListener.onReadDone(value, this);
+            objectReadListener.onReadDone(value, id, this);
         }
     }
 
-    protected void invokeListenersOnFieldName(String fieldName, Field field) throws ObjectReadException {
-        invokeListenersOnFieldName(fieldName, field, target);
+    protected void invokeListenersOnFieldName(String fieldName, Field field, Object id) throws ObjectReadException {
+        invokeListenersOnFieldName(fieldName, field, target, id);
     }
 
-    protected void invokeListenersOnFieldName(String fieldName, Field field, Object theTarget) throws ObjectReadException {
+    protected void invokeListenersOnFieldName(String fieldName, Field field, Object theTarget, Object id) throws ObjectReadException {
         for (ObjectReadListener objectReadListener : objectReadListeners) {
-            objectReadListener.onFieldName(fieldName, field, theTarget, this);
+            objectReadListener.onFieldName(fieldName, field, theTarget, id, this);
         }
     }
 
@@ -314,23 +315,23 @@ public class JsonObjectReader implements ObjectReader {
             } else if (jsonToken == JsonToken.BEGIN_OBJECT) {
 
                 Map map = new HashMap();
-                l("make map: " + map.hashCode());
-
+                l("make map: " + map.toString());
+                UUID mapUUID = UUID.randomUUID();
                 reader.beginObject();
                 while (reader.hasNext()) {
                     String name = reader.nextName();
                     l("read name: " + name);
 
-                    if(invokeListeners) invokeListenersOnFieldName(name, null, map);
+                    if(invokeListeners) invokeListenersOnFieldName(name, null, map, mapUUID);
 
                     map.put(name, readAnyObject(invokeListeners));
                 }
                 reader.endObject();
                 value = map;
 
-                l("done map: " + map.hashCode());
+                l("done map: " + map.toString());
 
-                if(invokeListeners) invokeListenersOnReadDone(value);
+                if(invokeListeners) invokeListenersOnReadDone(value, mapUUID);
 
             } else if (jsonToken == JsonToken.BOOLEAN) {
                 value = reader.nextBoolean();

@@ -134,7 +134,7 @@ public class MapObjectReader implements ObjectReader {
 
     protected void invokeListenersOnReadDone(Object value) throws ObjectReadException {
         for (ObjectReadListener objectReadListener : objectReadListeners) {
-            objectReadListener.onReadDone(value, this);
+            objectReadListener.onReadDone(value, null, this);  // TODO support needed for linking
         }
     }
 

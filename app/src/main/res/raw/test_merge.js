@@ -9,7 +9,7 @@
             "anim_out": "slide_out_right"
         },
         "__refmap__globalNavConfigs": {
-            "type": "org.androware.androbeans.beans.Step",
+            "type": "java.util.HashMap",
             "map": {
                 "other":        
                 {
