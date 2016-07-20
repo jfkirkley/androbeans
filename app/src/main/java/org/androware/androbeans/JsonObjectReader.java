@@ -187,6 +187,8 @@ public class JsonObjectReader implements ObjectReader {
                 value = reader.nextLong();
             } else if (double.class == fieldType) {
                 value = reader.nextDouble();
+            } else if (float.class == fieldType) {
+                value = new Float(reader.nextDouble());
             } else if (boolean.class == fieldType) {
                 value = reader.nextBoolean();
             } else if (String.class == fieldType) {

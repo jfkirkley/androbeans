@@ -93,6 +93,8 @@ public class JsonObjectWriter implements ObjectWriter {
             writer.value((long) value);
         } else if (double.class == fieldType) {
             writer.value((double) value);
+        } else if (float.class == fieldType) {
+            writer.value((float) value);
         } else if (boolean.class == fieldType) {
             writer.value((boolean) value);
         } else if (String.class == fieldType) {
