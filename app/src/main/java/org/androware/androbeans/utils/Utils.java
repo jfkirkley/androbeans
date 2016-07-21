@@ -207,7 +207,7 @@ public class Utils {
     }
 
     public static String removePunctuation(String s, String replacement) {
-        return s.replaceAll("[{}\\?\\.\\,\\:\\;!@#\\$%\\^&*\\(\\)\\+\\]\\[]+", replacement);
+        return s.replaceAll("[<>{}\\?\\.\\,\\:\\;!@#\\$%\\^&*\\(\\)\\+\\]\\[]+", replacement);
     }
 
     public static String removePunctuation(String s) {
