@@ -206,10 +206,14 @@ public class Utils {
         return s.replaceAll("[\\s{}\\?\\.\\,\\:\\;!@#\\$%\\^&*\\-\\(\\)\\+\\]\\[]+", "_");
     }
 
+    public static String removePunctuation(String s, String replacement) {
+        return s.replaceAll("[{}\\?\\.\\,\\:\\;!@#\\$%\\^&*\\(\\)\\+\\]\\[]+", replacement);
+    }
+
     public static String removePunctuation(String s) {
         // test code:
         //         String s = Utils.normalizeStringToFilePath("s{}!@#$abc%^&*()xyz+");
-        return s.replaceAll("[\\s{}\\?\\.\\,\\:\\;!@#\\$%\\^&*\\(\\)\\+\\]\\[]+", "");
+        return removePunctuation(s, " ");
     }
 
     public static void displayFiles(AssetManager mgr, String path, int level, ArrayList<String> paths) {
