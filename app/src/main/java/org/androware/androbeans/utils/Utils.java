@@ -184,6 +184,9 @@ public class Utils {
         return new File(absolutePath).exists();
     }
 
+    public static boolean externalFileExists(Activity activity, String type, String path, String fileName) {
+        return getExternalFile(activity, type, path, fileName).exists();
+    }
 
     public static void deleteFiles(File dir, final String ext) {
 
