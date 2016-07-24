@@ -14,6 +14,8 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
+import static android.R.attr.value;
+
 /**
  * Created by jkirkley on 6/17/16.
  */
@@ -87,15 +89,15 @@ public class JsonObjectWriter implements ObjectWriter {
     }
 
     public void writeValue(Class fieldType, Object value) throws IOException {
-        if (int.class == fieldType) {
+        if (int.class == fieldType || Integer.class == fieldType) {
             writer.value((int) value);
-        } else if (long.class == fieldType) {
+        } else if (long.class == fieldType || Long.class == fieldType) {
             writer.value((long) value);
-        } else if (double.class == fieldType) {
+        } else if (double.class == fieldType || Double.class == fieldType) {
             writer.value((double) value);
-        } else if (float.class == fieldType) {
+        } else if (float.class == fieldType || Float.class == fieldType) {
             writer.value((float) value);
-        } else if (boolean.class == fieldType) {
+        } else if (boolean.class == fieldType || Boolean.class == fieldType) {
             writer.value((boolean) value);
         } else if (String.class == fieldType) {
             writer.value((String) value);

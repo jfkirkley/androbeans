@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static android.R.attr.name;
+import static android.R.attr.value;
 
 /**
  * Created by jkirkley on 6/17/16.
@@ -181,15 +182,15 @@ public class JsonObjectReader implements ObjectReader {
     public Object readValue(Class fieldType, Field field) throws ObjectReadException {
         try {
             Object value = null;
-            if (int.class == fieldType) {
+            if (int.class == fieldType  || Integer.class == fieldType) {
                 value = reader.nextInt();
-            } else if (long.class == fieldType) {
+            } else if (long.class == fieldType || Long.class == fieldType) {
                 value = reader.nextLong();
-            } else if (double.class == fieldType) {
+            } else if (double.class == fieldType || Double.class == fieldType) {
                 value = reader.nextDouble();
-            } else if (float.class == fieldType) {
+            } else if (float.class == fieldType || Float.class == fieldType) {
                 value = new Float(reader.nextDouble());
-            } else if (boolean.class == fieldType) {
+            } else if (boolean.class == fieldType || Boolean.class == fieldType) {
                 value = reader.nextBoolean();
             } else if (String.class == fieldType) {
                 value = reader.nextString();
