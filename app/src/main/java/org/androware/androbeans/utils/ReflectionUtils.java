@@ -8,9 +8,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+
+import static android.R.attr.value;
 
 /**
  * Created by jkirkley on 5/21/16.
@@ -290,5 +294,31 @@ public class ReflectionUtils {
         Class clazz = getGenericType(c, fieldName, 0);
         T[] array = (T[]) java.lang.reflect.Array.newInstance(clazz, list.size());
         return list.toArray(array);
+    }
+
+
+    static class  NullCheck {
+        String str;
+        HashMap map = new HashMap();
+    }
+
+    public static Object checkNullGet(Object source, Object ... fields) {
+        if ( source != null && fields.length > 0  ) {
+            Object field = fields[0];
+            Object value = null;
+            if(source instanceof Map) {
+                value = ((Map) source).get(field);
+            } else if(source instanceof List && field instanceof Integer) {
+                value = ((List) source).get((Integer)field);
+            } else {
+                value = ReflectionUtils.getFieldValue(source, (String)field);
+            }
+
+            if(value != null) {
+                return checkNullGet(value, Arrays.copyOfRange(fields, 1, fields.length));
+            }
+            return null;
+        }
+        return source;
     }
 }

@@ -41,6 +41,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static android.R.attr.name;
+import static android.R.attr.value;
+
 /**
  * Created by jkirkley on 1/19/16.
  */
@@ -322,6 +325,7 @@ public class Utils {
         }
         return false;
     }
+
 
     public static String getExtraString(Bundle extras, String name) {
 
