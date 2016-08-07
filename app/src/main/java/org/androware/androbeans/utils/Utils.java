@@ -120,31 +120,6 @@ public class Utils {
         viewGroup.setLayoutParams(params);
     }
 
-    public static Object getListener(View v, String listenerType) {
-
-        try {
-            Field listenerInfoField = null;
-            listenerInfoField = Class.forName("android.view.View").getDeclaredField("mListenerInfo");
-
-            if (listenerInfoField != null) {
-                listenerInfoField.setAccessible(true);
-            }
-            Object myLiObject = listenerInfoField.get(v);
-
-            Field listenerField = null;
-            listenerField = Class.forName("android.view.View$ListenerInfo").getDeclaredField(listenerType);//"mOnClickListener");
-            if (listenerField != null && myLiObject != null) {
-                listenerField.setAccessible(true);
-                return listenerField.get(myLiObject);
-            }
-
-        } catch (NoSuchFieldException e) {
-        } catch (ClassNotFoundException e) {
-        } catch (IllegalAccessException e) {
-        }
-        return null;
-    }
-
     public static View findView(Activity activity, String viewId) {
         return activity.findViewById(ResourceUtils.getViewResId(viewId));
     }

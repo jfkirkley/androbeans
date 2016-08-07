@@ -160,7 +160,36 @@ public class ReflectionUtils {
 
     }
 
+    public static Method getMethodFromArgs(Class cls, String methodName, Object... params) {
 
+        Method[] methods = cls.getMethods();
+        Method toInvoke = null;
+
+
+        for (Method method : methods) {
+            if (!methodName.equals(method.getName())) {
+                continue;
+            }
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (params == null && paramTypes == null) {
+                toInvoke = method;
+                break;
+            } else if (params == null || paramTypes == null
+                    || paramTypes.length != params.length) {
+                continue;
+            }
+
+            for (int i = 0; i < params.length; ++i) {
+                if (!paramTypes[i].isAssignableFrom(params[i].getClass())) {
+                    continue ;
+                }
+            }
+            toInvoke = method;
+        }
+        return toInvoke;
+    }
+
+/*
     public static Method getMethodFromArgs(Class c, String methodName, Object... args) {
 
         try {
@@ -174,7 +203,7 @@ public class ReflectionUtils {
         }
         return null;
     }
-
+*/
 
     public static Method getMethod(Class c, String methodName, Class... paramTypes) {
 
