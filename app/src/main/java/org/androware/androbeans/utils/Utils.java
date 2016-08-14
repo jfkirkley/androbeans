@@ -38,10 +38,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static android.R.attr.name;
+import static android.R.attr.path;
+import static android.R.attr.type;
 import static android.R.attr.value;
 
 /**
@@ -178,6 +181,25 @@ public class Utils {
             Log.d("util", "delete: " + f.getAbsolutePath());
             f.delete();
         }
+    }
+
+    public static List<File> getFiles(Activity activity, String dirName, String suffix) {
+        return getFiles(activity.getExternalFilesDir(dirName), suffix);
+    }
+
+    public static List<File> getFiles(File dir, final String suffix) {
+
+        FilenameFilter ff;
+        ff = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(suffix);
+            }
+        };
+        List<File> files = new ArrayList<>();
+        for (File f : dir.listFiles(ff)) {
+            files.add(f);
+        }
+        return files;
     }
 
     public static String normalizeStringToFilePath(String s) {

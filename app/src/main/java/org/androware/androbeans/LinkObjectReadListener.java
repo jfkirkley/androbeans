@@ -166,17 +166,17 @@ public class LinkObjectReadListener extends InitializingReadListener {
 
                     if (myVal == null) {
 
-                        field.set(thisBean, otherVal);
+                        field.set(thisBean, ReflectionUtils.tryCopy(otherVal));
 
                     } else if (Map.class.isAssignableFrom(fieldType)) {
 
                         mergeMap((Map) myVal, (Map) otherVal);
 
                     } else if (!Utils.isPrimitiveOrString(myVal)) {
+
                         mergeObject(myVal, otherVal);
                     }
                 }
-
             }
         } catch (IllegalAccessException e) {
         }

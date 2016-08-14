@@ -250,6 +250,15 @@ public class ReflectionUtils {
 
     }
 
+    // returns a copy if there is a copy constructor.  Otherwise, just returns the same object
+    public static Object tryCopy(Object object){
+        Constructor constructor = getConstructor(object.getClass(), object.getClass());
+        if( constructor != null) {
+            return newInstance(constructor, object);
+        }
+        return object;
+    }
+
     public static Object newInstance(Constructor constructor, Object... args) {
         try {
             return constructor.newInstance(args);

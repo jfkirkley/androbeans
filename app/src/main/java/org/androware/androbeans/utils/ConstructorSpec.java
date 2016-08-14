@@ -2,6 +2,7 @@ package org.androware.androbeans.utils;
 
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.R.attr.name;
@@ -19,9 +20,22 @@ public class ConstructorSpec  {
     public String targetClassName;
 
     protected Class [] paramClasses;
+
     protected Class targetClass;
 
     public ConstructorSpec() {
+    }
+
+    public ConstructorSpec(ConstructorSpec otherConstructorSpec) {
+        targetClassName = otherConstructorSpec.targetClassName;
+        paramClassNames = otherConstructorSpec.paramClassNames;
+        paramClasses = otherConstructorSpec.getParamClasses();
+        targetClass = otherConstructorSpec.getTargetClass();
+        paramObjects = new Object[otherConstructorSpec.paramObjects.length];
+
+        for(int i = 0; i < paramObjects.length; ++i) {
+            paramObjects[i] = otherConstructorSpec.paramObjects[i];
+        }
     }
 
     public ConstructorSpec(Class targetClass) {
@@ -116,7 +130,7 @@ public class ConstructorSpec  {
         setParamObjects(paramObjects);
         Constructor constructor = ReflectionUtils.getConstructor(targetClass, paramClasses);
         return ReflectionUtils.newInstance(constructor, this.paramObjects);
-    }
+     }
 
     public void plugInValue(Object value, String name) {
         for(int i = 0; i < paramClasses.length; ++i) {
@@ -131,4 +145,10 @@ public class ConstructorSpec  {
             }
         }
     }
+
+
+    public Class getTargetClass() {
+        return targetClass;
+    }
+
 }
