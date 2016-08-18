@@ -42,12 +42,16 @@ public class JsonObjectReader implements ObjectReader {
     }
 
     public JsonObjectReader(JsonReader reader, Class type, JsonObjectReader parent) throws ObjectReadException {
+        this(reader, type, parent, parent!=null? parent.getObjectReadListeners(): null);
+    }
+
+    public JsonObjectReader(JsonReader reader, Class type, JsonObjectReader parent, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
         this.reader = reader;
         this.type = type;
         this.parent = parent;
 
-        if (parent != null) {
-            this.setObjectReadListeners(parent.getObjectReadListeners());
+        if (objectReadListeners != null) {
+            this.setObjectReadListeners(objectReadListeners);
         }
 
         target = invokeListenersOnCreate(type);
@@ -59,8 +63,8 @@ public class JsonObjectReader implements ObjectReader {
         invokeListenersOnPostCreate();
     }
 
-    public JsonObjectReader(InputStream in, Class type) throws IOException, ObjectReadException{
-        this(new JsonReader(new InputStreamReader(in, "UTF-8")), type);
+    public JsonObjectReader(InputStream in, Class type, JsonObjectReader parent, List<ObjectReadListener> objectReadListeners) throws IOException, ObjectReadException{
+        this(new JsonReader(new InputStreamReader(in, "UTF-8")), type, parent, objectReadListeners);
     }
 
     public void close() throws ObjectReadException {

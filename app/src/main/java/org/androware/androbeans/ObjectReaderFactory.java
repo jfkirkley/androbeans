@@ -67,10 +67,7 @@ public class ObjectReaderFactory {
     public JsonObjectReader makeJsonReader(String resourceName, String resourceGroup, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
         JsonObjectReader jsonObjectReader = null;
         try {
-            jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(activity, resourceName, resourceGroup), type);
-            if(objectReadListeners != null) {
-                jsonObjectReader.setObjectReadListeners(objectReadListeners);
-            }
+            jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(activity, resourceName, resourceGroup), type, null, objectReadListeners);
             return jsonObjectReader;
         } catch (IOException e) {
             throw new ObjectReadException(e);
@@ -96,10 +93,7 @@ public class ObjectReaderFactory {
     public JsonObjectReader makeJsonReader(InputStream inputStream, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
         JsonObjectReader jsonObjectReader = null;
         try {
-            jsonObjectReader = new JsonObjectReader(inputStream, type);
-            if(objectReadListeners != null) {
-                jsonObjectReader.setObjectReadListeners(objectReadListeners);
-            }
+            jsonObjectReader = new JsonObjectReader(inputStream, type, null, objectReadListeners);
             return jsonObjectReader;
         } catch (IOException e) {
             throw new ObjectReadException(e);

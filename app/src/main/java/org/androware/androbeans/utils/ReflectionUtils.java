@@ -1,7 +1,6 @@
 package org.androware.androbeans.utils;
 
 
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -12,9 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
-import static android.R.attr.value;
 
 /**
  * Created by jkirkley on 5/21/16.
@@ -107,7 +104,7 @@ public class ReflectionUtils {
         try {
 
             Field field = null;
-            field = targetClass.getDeclaredField(fieldName);
+            field = targetClass.getField(fieldName);
 
             return field.getType();
 
@@ -121,7 +118,7 @@ public class ReflectionUtils {
         try {
 
             Field field = null;
-            field = targetClass.getDeclaredField(fieldName);
+            field = targetClass.getField(fieldName);
             field.set(target, value);
 
         } catch (NoSuchFieldException e) {
@@ -136,7 +133,7 @@ public class ReflectionUtils {
         try {
 
             Field field = null;
-            field = targetClass.getDeclaredField(fieldName);
+            field = targetClass.getField(fieldName);
 
             if (field != null) {
                 field.setAccessible(true);

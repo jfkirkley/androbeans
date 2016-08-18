@@ -29,7 +29,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
     private HashMap<String, Object> idMap = new HashMap<>();
     //private HashMap<ObjectReader, Stack<BeanRef>> pendingMergeMap = new HashMap<>();
     private HashMap<Object, BeanRef> pendingMergeMap = new HashMap<>();
-    private HashMap<Class, Class> typeOverrides = new HashMap<>();
+    private HashMap<Class, String> typeOverrides = new HashMap<>();
 
 
     public class BeanRef {
@@ -119,7 +119,7 @@ public class LinkObjectReadListener extends InitializingReadListener {
     @Override
     public Object onCreate(Class type, ObjectReader objectReader) {
         if (typeOverrides.containsKey(type)) {
-            Class overrideType = typeOverrides.get(type);
+            String overrideType = typeOverrides.get(type);
             return ReflectionUtils.newInstance(overrideType);
         }
         return null;

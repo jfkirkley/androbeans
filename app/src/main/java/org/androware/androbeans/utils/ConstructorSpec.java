@@ -1,12 +1,7 @@
 package org.androware.androbeans.utils;
 
-
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.List;
-
-import static android.R.attr.name;
-
 
 /**
  * Created by jkirkley on 6/9/16.
