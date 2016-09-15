@@ -26,9 +26,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -397,23 +399,73 @@ public class Utils {
     }
 
     public static String upCaseFirstLetter(String s) {
-        return s.substring(0,1).toUpperCase() + s.substring(1);
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
-    public static <K, C> void addToContainerValue(Map<K, C> map,  K key, Object value) {
-        if(!map.containsKey(key)) {
+    public static <K, C> void addToContainerValue(Map<K, C> map, K key, Object value) {
+        if (!map.containsKey(key)) {
             //  TODO can this be done??? C container = ReflectionUtils.newInstance(C);
         }
     }
 
-    public static void addValueToMappedContainer(Field mapField, Map map,  Object key, Object value) {
-        if(!map.containsKey(key)) {
+    public static void addValueToMappedContainer(Field mapField, Map map, Object key, Object value) {
+        if (!map.containsKey(key)) {
             Class containerType = ReflectionUtils.getGenericType(mapField, 1);
-            if(Collection.class.isAssignableFrom(containerType)) {
-                Collection collection = (Collection)ReflectionUtils.newInstance(containerType);
+            if (Collection.class.isAssignableFrom(containerType)) {
+                Collection collection = (Collection) ReflectionUtils.newInstance(containerType);
                 collection.add(value);
                 map.put(key, collection);
             }
         }
+    }
+
+    public static boolean oneOfTheseFilesIsBeingUsed(List<String> fileNames) {
+        for (String fname : fileNames) {
+            if (Utils.filesIsBeingUsed(fname)) {
+                Log.d("fileUtil", fname + " is being used");
+                return true;
+            }
+        }
+        Log.d("fileUtil", "No files used !!!!!!!!!!!!!!!!!!!!!!!!!!");
+        return false;
+    }
+
+    public static boolean filesIsBeingUsed(String filename) {
+
+        boolean isLocked = false;
+        RandomAccessFile fos = null;
+        try {
+            File file = new File(filename);
+            if (file.exists()) {
+                Log.d("fileUtil", filename + " exists");
+                fos = new RandomAccessFile(file, "rw");
+            } else {
+                Log.d("fileUtil", filename + " does not exist");
+            }
+        } catch (FileNotFoundException e) {
+            Log.d("fileUtil", filename + " not found");
+            isLocked = true;
+        } catch (SecurityException e) {
+            Log.d("fileUtil", filename + " got security exception");
+            isLocked = true;
+        } catch (Exception e) {
+            Log.d("fileUtil", filename + " got exception: " + e.getMessage());
+            isLocked = true;
+            // handle exception
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+                Log.d("fileUtil", filename + " now closed: " + isLocked);
+
+            } catch (Exception e) {
+                //handle exception
+                Log.d("fileUtil", filename + " got exception: " + e.getMessage());
+                isLocked = true;
+            }
+        }
+        Log.d("fileUtil", filename + " locked: " + isLocked);
+        return isLocked;
     }
 }
