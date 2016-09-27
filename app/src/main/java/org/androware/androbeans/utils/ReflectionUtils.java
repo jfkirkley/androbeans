@@ -157,31 +157,49 @@ public class ReflectionUtils {
 
     }
 
+    public static String getMethodId(Class cls, String methodName, Object... params) {
+        String id = cls.getName() + methodName;
+        for(Object p: params) {
+            id+= p.getClass().getName();
+        }
+        return id;
+    }
+
+    public static Map<String, Method>  methodCache = new HashMap<>();
+
     public static Method getMethodFromArgs(Class cls, String methodName, Object... params) {
 
-        Method[] methods = cls.getMethods();
-        Method toInvoke = null;
+        String methodId = getMethodId(cls, methodName, params);
+        // first check cache
+        Method toInvoke = methodCache.get(methodId);
 
+        if(toInvoke == null) {
 
-        for (Method method : methods) {
-            if (!methodName.equals(method.getName())) {
-                continue;
-            }
-            Class<?>[] paramTypes = method.getParameterTypes();
-            if (params == null && paramTypes == null) {
-                toInvoke = method;
-                break;
-            } else if (params == null || paramTypes == null
-                    || paramTypes.length != params.length) {
-                continue;
-            }
+            Method[] methods = cls.getMethods();
 
-            for (int i = 0; i < params.length; ++i) {
-                if (!paramTypes[i].isAssignableFrom(params[i].getClass())) {
-                    continue ;
+            for (Method method : methods) {
+                if (!methodName.equals(method.getName())) {
+                    continue;
                 }
+                Class<?>[] paramTypes = method.getParameterTypes();
+                if (params == null && paramTypes == null) {
+                    toInvoke = method;
+                    methodCache.put(methodId, method);
+                    break;
+                } else if (params == null || paramTypes == null
+                        || paramTypes.length != params.length) {
+                    continue;
+                }
+
+                for (int i = 0; i < params.length; ++i) {
+                    if (!paramTypes[i].isAssignableFrom(params[i].getClass())) {
+                        continue;
+                    }
+                }
+                toInvoke = method;
+                methodCache.put(methodId, method);
+                break;
             }
-            toInvoke = method;
         }
         return toInvoke;
     }
@@ -217,7 +235,9 @@ public class ReflectionUtils {
             return method.invoke(target, args);
         } catch (InvocationTargetException e) {
             // TODO handle this properly
+            e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -229,7 +249,9 @@ public class ReflectionUtils {
             return method.invoke(target, args);
         } catch (InvocationTargetException e) {
             // TODO handle this properly
+            e.printStackTrace();
         } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
         return null;
     }

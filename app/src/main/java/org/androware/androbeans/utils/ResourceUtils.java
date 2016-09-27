@@ -1,8 +1,13 @@
 package org.androware.androbeans.utils;
 
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -11,6 +16,7 @@ import java.io.InputStream;
 public class ResourceUtils {
 
     public static Class R = null;
+    public static Context context = null;
 
     public static int getResId(String groupName, String resName, Class resourceClass) {
         Class group = getResourceGroup(groupName, resourceClass);
@@ -116,5 +122,24 @@ public class ResourceUtils {
         }
         throw new IllegalArgumentException("Dotname '" + dotName + "' is not a valid resource path.");
     }
+
+
+    public static Map<Integer, Object> resourceCache = new HashMap<>();
+
+    public static Object getCachedResource(int id) {
+        return resourceCache.get(id);
+    }
+
+    // BAD: not actually a good idea because these stay in ram and are not released
+    public static Drawable getDrawableResource(String name) {
+        int id = getResId("drawable", name);
+        Object cachedObj = getCachedResource(id);
+        if(cachedObj == null) {
+            cachedObj = ContextCompat.getDrawable(context, id);
+            resourceCache.put(id, cachedObj);
+        }
+        return (Drawable)cachedObj;
+    }
+
 
 }
