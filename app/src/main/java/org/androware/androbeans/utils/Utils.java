@@ -240,6 +240,27 @@ public class Utils {
         }
     }
 
+    public static int [] makeRandArray(int size) {
+
+        int randIndexMap [] = new int[size];
+
+        for(int c = 0; c < size; ++c) {
+
+            while(true) {
+                int rand = (int) Math.round( Math.random() * size );
+                int i = 0;
+                for(; i < randIndexMap.length; ++i){
+                    if(rand == randIndexMap[i]) break;
+                }
+                if(i == randIndexMap.length) {
+                    randIndexMap[c] = rand;
+                    break;
+                }
+            }
+        }
+
+        return randIndexMap;
+    }
 
     public static void startActivity(Class activityClass, HashMap<String, String> extras, HashMap<String, Parcelable> parcelableHashMap, Activity activity) {
         Intent intent = new Intent(activity, activityClass);
