@@ -328,6 +328,11 @@ public class ReflectionUtils {
         }
         ParameterizedType genericType = (ParameterizedType) f.getGenericType();
         Type t[] = genericType.getActualTypeArguments();
+
+        if(t[indexOfType] instanceof ParameterizedType) {
+            return (Class)((ParameterizedType)t[indexOfType]).getRawType();
+        }
+
         return (Class) t[indexOfType];
 
     }

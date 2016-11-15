@@ -1,5 +1,6 @@
 package org.androware.androbeans.utils;
 
+import android.content.ContextWrapper;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Toast;
@@ -159,8 +160,8 @@ public class Utils {
         return new FileOutputStream(file);
     }
 
-    public static File getExternalFile(Activity activity, String type, String path, String fileName) {
-        return new File(activity.getExternalFilesDir(type), path + fileName);
+    public static File getExternalFile(ContextWrapper contextWrapper, String type, String path, String fileName) {
+        return new File(contextWrapper.getExternalFilesDir(type), path + fileName);
     }
 
     public static boolean fileExists(String absolutePath) {
@@ -317,13 +318,13 @@ public class Utils {
     }
 
     /*
-        public static void startActivity(HashMap extras, Class activityClass, AppCompatActivity activity) {
+        public static void startActivity(HashMap extras, Class activityClass, AppCompatActivity contextWrapper) {
 
-            Intent intent = new Intent(activity, activityClass);
+            Intent intent = new Intent(contextWrapper, activityClass);
             for(String k: extras.keySet()) {
                 intent.putExtra(k, extras.get(k));
             }
-            activity.startActivity(intent);
+            contextWrapper.startActivity(intent);
         }
     */
 

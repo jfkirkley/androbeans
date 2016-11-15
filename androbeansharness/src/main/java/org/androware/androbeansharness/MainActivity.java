@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
         FilterLog.inst().activateTag(TAG);
         FilterLog.inst().activateTag(JsonObjectReader.TAG);
 
+        /*
         try {
             JsonObjectReader jsonObjectReader =  new JsonObjectReader(ResourceUtils.getResourceInputStream(this, "test_merge", "raw"), Flow.class);
             jsonObjectReader.addObjectReadListener(new LinkObjectReadListener());
@@ -52,7 +53,7 @@ public class MainActivity extends Activity {
         } catch( Exception e) {
 
         }
-
+*/
     }
 
     @Override

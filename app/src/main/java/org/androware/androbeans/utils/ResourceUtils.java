@@ -2,6 +2,7 @@ package org.androware.androbeans.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
@@ -27,8 +28,12 @@ public class ResourceUtils {
     public static int getResId(String groupName, String resName) {
         return getResId(groupName, resName, R);
     }
-
-    public static InputStream getResourceInputStream(Activity activity, String resourceName, String groupName) {
+/*
+    public static InputStream getResourceInputStream(Activity contextWrapper, String resourceName, String groupName) {
+        return contextWrapper.getResources().openRawResource(getResId(groupName, resourceName));
+    }
+*/
+    public static InputStream getResourceInputStream(ContextWrapper activity, String resourceName, String groupName) {
         return activity.getResources().openRawResource(getResId(groupName, resourceName));
     }
 

@@ -1,6 +1,7 @@
 package org.androware.androbeans;
 
 import android.app.Activity;
+import android.content.ContextWrapper;
 
 import org.androware.androbeans.utils.ResourceUtils;
 
@@ -15,24 +16,24 @@ import java.util.Map;
  */
 public class ObjectReaderFactory {
     private static ObjectReaderFactory ourInstance = null;
-    public Activity activity;
+    public ContextWrapper contextWrapper;
 
     public static ObjectReaderFactory getInstance() {
         return getInstance(null);
     }
 
-    public static ObjectReaderFactory getInstance(Activity activity) {
+    public static ObjectReaderFactory getInstance(ContextWrapper contextWrapper) {
         if(ourInstance == null){
-            if(activity == null) {
-                throw new IllegalArgumentException("Must intialize ObjectReaderFactory with an activity reference. ");
+            if(contextWrapper == null) {
+                throw new IllegalArgumentException("Must intialize ObjectReaderFactory with an contextWrapper reference. ");
             }
-            ourInstance = new ObjectReaderFactory(activity);
+            ourInstance = new ObjectReaderFactory(contextWrapper);
         }
         return ourInstance;
     }
 
-    private ObjectReaderFactory(Activity activity) {
-        this.activity = activity;
+    private ObjectReaderFactory(ContextWrapper contextWrapper) {
+        this.contextWrapper = contextWrapper;
     }
 
     public MapObjectReader makeMapReader(Map map, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
@@ -67,7 +68,7 @@ public class ObjectReaderFactory {
     public JsonObjectReader makeJsonReader(String resourceName, String resourceGroup, Class type, List<ObjectReadListener> objectReadListeners) throws ObjectReadException {
         JsonObjectReader jsonObjectReader = null;
         try {
-            jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(activity, resourceName, resourceGroup), type, null, objectReadListeners);
+            jsonObjectReader = new JsonObjectReader(ResourceUtils.getResourceInputStream(contextWrapper, resourceName, resourceGroup), type, null, objectReadListeners);
             return jsonObjectReader;
         } catch (IOException e) {
             throw new ObjectReadException(e);

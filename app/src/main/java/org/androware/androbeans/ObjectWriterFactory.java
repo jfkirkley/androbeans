@@ -21,7 +21,7 @@ public class ObjectWriterFactory {
     public static ObjectWriterFactory getInstance(Activity activity) {
         if(ourInstance == null) {
             if(activity == null) {
-                throw new IllegalArgumentException("Must intialize ObjectReaderFactory with an activity reference. ");
+                throw new IllegalArgumentException("Must intialize ObjectReaderFactory with an contextWrapper reference. ");
             }
             ourInstance = new ObjectWriterFactory(activity);
         }
