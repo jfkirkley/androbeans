@@ -24,16 +24,31 @@ public class PaintBean {
     public int strokeWidth = -1;
 
     public Rect getFontBounds(String text) {
+        return getFontBounds(text, -1);
+    }
+
+    public Rect getFontBounds(String text, int textSize) {
+        buildPaint();
         Rect textBounds = new Rect();
+        if(textSize != -1) {
+            paint.setTextSize(textSize);
+        }
         paint.getTextBounds(text, 0, text.length(), textBounds);
+        if(fontSize != -1) {
+            paint.setTextSize(fontSize);
+        }
         return textBounds;
     }
 
     public Paint getPaint() {
+        buildPaint();
         return paint;
     }
 
     Paint paint = null;
+
+    public PaintBean() {
+    }
 
     public PaintBean(int color) {
         this(color, -1, -1, null, -1);
@@ -97,7 +112,17 @@ public class PaintBean {
     }
 
     public void setNormalColor() {
+        buildPaint();
         paint.setColor((int)color);
+    }
+
+    public Paint clonePaint() {
+        buildPaint();
+        return new Paint(paint);
+    }
+
+    public String toString() {
+        return "color: " + color + ", hlc: " + hightLightColor + ", style: " + style + ", sw: " + strokeWidth + ", fs: " + fontSize;
     }
 
 }

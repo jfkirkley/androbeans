@@ -11,6 +11,8 @@ import java.util.Map;
 public class StylesBean {
     public Map<String, PaintBean> paintMap;
 
+    public StylesBean() {}
+
     public PaintBean getPaintBean(String name) {
         return paintMap.get(name);
     }

@@ -49,7 +49,7 @@ public class JsonObjectWriter implements ObjectWriter {
             writer.beginObject();
             for (Field f : fields) {
 
-                if (Modifier.isFinal(f.getModifiers())) {
+                if (Modifier.isFinal(f.getModifiers()) || Modifier.isStatic(f.getModifiers())) {
                     continue;
                 }
 

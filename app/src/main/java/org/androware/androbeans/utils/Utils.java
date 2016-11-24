@@ -3,6 +3,7 @@ package org.androware.androbeans.utils;
 import android.content.ContextWrapper;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.widget.Toast;
 
 
@@ -27,10 +28,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -126,6 +130,10 @@ public class Utils {
         viewGroup.setLayoutParams(params);
     }
 
+    public static int getInverseColor(int color) {
+        return (0x00FFFFFF - (color | 0xFF000000)) | (color & 0xFF000000);
+    }
+
     public static View findView(Activity activity, String viewId) {
         return activity.findViewById(ResourceUtils.getViewResId(viewId));
     }
@@ -155,13 +163,157 @@ public class Utils {
         return new File(activity.getFilesDir(), path + fileName);
     }
 
-    public static FileOutputStream getExternalFileOutputStream(Activity activity, String type, String path, String fileName) throws IOException {
-        File file = getExternalFile(activity, type, path, fileName);
+    public static FileOutputStream getExternalFileOutputStream(ContextWrapper contextWrapper, String type, String path, String fileName) throws IOException {
+        File file = getExternalFile(contextWrapper, type, path, fileName);
         return new FileOutputStream(file);
     }
 
     public static File getExternalFile(ContextWrapper contextWrapper, String type, String path, String fileName) {
-        return new File(contextWrapper.getExternalFilesDir(type), path + fileName);
+        String fullPath = path != null ? path + fileName : fileName;
+        return new File(contextWrapper.getExternalFilesDir(type), fullPath);
+    }
+/*
+    public static void copyAssetsToExternal(AssetManager assetManager, String subDir) {
+
+        String[] files = null;
+        subDir = subDir == null ? "" : subDir;
+
+        try {
+            files = assetManager.list(subDir);
+        } catch (IOException e) {
+            Log.e("tag", "Failed to get asset file list.", e);
+        }
+
+        String extDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        for (String filename : files) {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                String extPath = (subDir.length() > 0) ? extDir + "/" + subDir : extDir;
+                File outFile = new File(extPath, filename);
+
+                String assetPath = (subDir.length() > 0) ? "/" + subDir + "/" + filename : filename;
+
+                Log.d("util", "copy " + assetPath + " to " + outFile.getAbsolutePath());
+
+                in = assetManager.open(assetPath);
+                out = new FileOutputStream(outFile);
+
+                copyFile(in, out);
+
+                in.close();
+                out.close();
+
+            } catch (IOException e) {
+                Log.e("tag", "Failed to copy asset file: " + filename, e);
+            }
+        }
+    }
+*/
+    public static void copyAssetsToExternal(AssetManager assetManager, String extDir) {
+
+        String[] files = null;
+
+        try {
+            files = assetManager.list("");
+        } catch (IOException e) {
+            Log.e("tag", "Failed to get asset file list.", e);
+        }
+
+        //String extDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        for (String filename : files) {
+            InputStream in = null;
+            OutputStream out = null;
+            if (!filename.startsWith("images") && !filename.startsWith("sounds") && !filename.startsWith("webkit"))
+                try {
+                    String extPath = extDir;
+                    File outFile = new File(extPath, filename);
+
+                    String assetPath = filename;
+
+                    Log.d("util", "copy " + assetPath + " to " + outFile.getAbsolutePath());
+
+                    in = assetManager.open(assetPath);
+                    out = new FileOutputStream(outFile);
+
+                    copyFile(in, out);
+
+                    in.close();
+                    out.flush();
+                    out.close();
+
+                } catch (IOException e) {
+                    Log.e("tag", "Failed to copy asset file: " + filename, e);
+                }
+        }
+    }
+
+    public static void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
+    }
+
+    public static StringBuffer externalFile2stringBuffer(ContextWrapper contextWrapper, String type, String path, String fileName) {
+        return file2stringBuffer(getExternalFile(contextWrapper, type, path, fileName));
+    }
+
+    public static StringBuffer file2stringBuffer(String path) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(new File(path));
+            return file2stringBuffer(fileInputStream);
+        } catch( IOException e) {
+        }
+        return null;
+    }
+
+    public static StringBuffer file2stringBuffer(File file) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            return file2stringBuffer(fileInputStream);
+        } catch( IOException e) {
+        }
+        return null;
+    }
+
+    public static StringBuffer file2stringBuffer(InputStream in) throws IOException {
+        byte[] buffer = new byte[1024];
+        StringBuffer stringBuffer = new StringBuffer(1024);
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            stringBuffer.append(new String(buffer, 0, read));
+        }
+        in.close();
+        return stringBuffer;
+    }
+
+    public static void string2externalFile(ContextWrapper contextWrapper, String type, String path, String fileName, String string) {
+        string2file(getExternalFile(contextWrapper, type, path, fileName), string);
+    }
+
+    public static void string2file(String path, String string) {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(path));
+            string2file(fileOutputStream, string);
+        } catch( IOException e) {
+        }
+    }
+
+    public static void string2file(File file, String string) {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            string2file(fileOutputStream, string);
+        } catch( IOException e) {
+        }
+    }
+
+    public static void string2file(OutputStream out, String string) throws IOException {
+        out.write(string.getBytes());
+        out.close();
     }
 
     public static boolean fileExists(String absolutePath) {
@@ -241,19 +393,19 @@ public class Utils {
         }
     }
 
-    public static int [] makeRandArray(int size) {
+    public static int[] makeRandArray(int size) {
 
-        int randIndexMap [] = new int[size];
+        int randIndexMap[] = new int[size];
 
-        for(int c = 0; c < size; ++c) {
+        for (int c = 0; c < size; ++c) {
 
-            while(true) {
-                int rand = (int) Math.round( Math.random() * size );
+            while (true) {
+                int rand = (int) Math.round(Math.random() * size);
                 int i = 0;
-                for(; i < randIndexMap.length; ++i){
-                    if(rand == randIndexMap[i]) break;
+                for (; i < randIndexMap.length; ++i) {
+                    if (rand == randIndexMap[i]) break;
                 }
-                if(i == randIndexMap.length) {
+                if (i == randIndexMap.length) {
                     randIndexMap[c] = rand;
                     break;
                 }
