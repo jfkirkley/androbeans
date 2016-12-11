@@ -17,6 +17,7 @@ public class PaintBean {
     public final static String FILL_AND_STROKE = "FILL_AND_STROKE";
     public final static String STROKE = "STROKE";
 
+    public String name;
     public long color = Long.MAX_VALUE;   // N0TE: any int is a color, so we use longs so we can have Long.MAX_VALUE as our null value
     public long hightLightColor = Long.MAX_VALUE;
     public int fontSize = -1;
