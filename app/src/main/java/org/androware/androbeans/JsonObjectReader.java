@@ -3,6 +3,7 @@ package org.androware.androbeans;
 import android.util.JsonReader;
 import android.util.JsonToken;
 
+import org.androware.androbeans.beans.Flow;
 import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ReflectionUtils;
 
@@ -18,6 +19,8 @@ import java.util.UUID;
 
 import static android.R.attr.name;
 import static android.R.attr.value;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 
 /**
  * Created by jkirkley on 6/17/16.
@@ -84,6 +87,7 @@ public class JsonObjectReader implements ObjectReader {
             while (reader.hasNext()) {
 
                 String fieldName = reader.nextName();
+                l(fieldName);
                 try {
                     Field field = type.getField(fieldName);
                     invokeListenersOnFieldName(fieldName, field, targetUUID);
@@ -186,14 +190,63 @@ public class JsonObjectReader implements ObjectReader {
     public Object readValue(Class fieldType, Field field) throws ObjectReadException {
         try {
             Object value = null;
+            JsonToken jsonToken = reader.peek();
             if (int.class == fieldType  || Integer.class == fieldType) {
-                value = reader.nextInt();
+                if( jsonToken == JsonToken.NUMBER ) {
+                    value = reader.nextInt();
+                } else if( jsonToken == JsonToken.STRING ) {
+                    String numRep = reader.nextString();
+                    try {
+                        value = numRep.startsWith("0x")? parseInt(numRep.substring(2),  16): parseInt(numRep);
+                    } catch (NumberFormatException e) {
+                        throw new ObjectReadException("expected integer or integer string rep");
+                    }
+                } else {
+                    throw new ObjectReadException("expected integer or integer string rep");
+                }
             } else if (long.class == fieldType || Long.class == fieldType) {
-                value = reader.nextLong();
+                if( jsonToken == JsonToken.NUMBER ) {
+                    value = reader.nextLong();
+                } else if( jsonToken == JsonToken.STRING ) {
+                    String numRep = reader.nextString();
+                    try {
+                        value = numRep.startsWith("0x")? parseLong(numRep.substring(2),  16): parseLong(numRep);
+
+                    } catch (NumberFormatException e) {
+                        throw new ObjectReadException("expected long or long string rep");
+                    }
+                } else {
+                    throw new ObjectReadException("expected long or long string rep");
+                }
+
             } else if (double.class == fieldType || Double.class == fieldType) {
-                value = reader.nextDouble();
+                if( jsonToken == JsonToken.NUMBER ) {
+                    value = reader.nextDouble();
+                } else if( jsonToken == JsonToken.STRING ) {
+                    String numRep = reader.nextString();
+                    try {
+                        value = Double.parseDouble(numRep);
+                    } catch (NumberFormatException e) {
+                        throw new ObjectReadException("expected double or double string rep");
+                    }
+                } else {
+                    throw new ObjectReadException("expected double or double string rep");
+                }
+
             } else if (float.class == fieldType || Float.class == fieldType) {
-                value = new Float(reader.nextDouble());
+                if( jsonToken == JsonToken.NUMBER ) {
+                    value = new Float(reader.nextDouble());
+                } else if( jsonToken == JsonToken.STRING ) {
+                    String numRep = reader.nextString();
+                    try {
+                        value = Float.parseFloat(numRep);
+                    } catch (NumberFormatException e) {
+                        throw new ObjectReadException("expected float or float string rep");
+                    }
+                } else {
+                    throw new ObjectReadException("expected float or float string rep");
+                }
+
             } else if (boolean.class == fieldType || Boolean.class == fieldType) {
                 value = reader.nextBoolean();
             } else if (String.class == fieldType) {

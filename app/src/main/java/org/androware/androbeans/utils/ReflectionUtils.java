@@ -57,7 +57,9 @@ public class ReflectionUtils {
 
     public static Object getFieldValue(Field field, Object target) {
         try {
-            return field.get(target);
+            if(field != null) {
+                return field.get(target);
+            }
         } catch (IllegalAccessException e) {
         }
         return null;
