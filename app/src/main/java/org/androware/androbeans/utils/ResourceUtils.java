@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -23,6 +24,11 @@ public class ResourceUtils {
         Class group = getResourceGroup(groupName, resourceClass);
         Integer idValue = (Integer)ReflectionUtils.getStaticDeclaredFieldValue(group, resName);
         return idValue.intValue();
+    }
+
+    public static String getViewIdName(View v) {
+        return v.getResources().getResourceEntryName(v.getId());
+        //return v.getResources().getResourceName(v.getId());
     }
 
     public static int getResId(String groupName, String resName) {
