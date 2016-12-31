@@ -122,6 +122,12 @@ public class PaintBean {
         return new Paint(paint);
     }
 
+    public Paint rebuild() {
+        paint = null;
+        buildPaint();
+        return paint;
+    }
+
     public String toString() {
         return "color: " + color + ", hlc: " + hightLightColor + ", style: " + style + ", sw: " + strokeWidth + ", fs: " + fontSize;
     }
