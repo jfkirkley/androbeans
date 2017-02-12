@@ -35,9 +35,6 @@ public class PaintBean {
             paint.setTextSize(textSize);
         }
         paint.getTextBounds(text, 0, text.length(), textBounds);
-        if(fontSize != -1) {
-            paint.setTextSize(fontSize);
-        }
         return textBounds;
     }
 

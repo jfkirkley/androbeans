@@ -61,6 +61,11 @@ public class Utils {
 
     public static Object R;
 
+    public static void l(String t) {
+        FilterLog.inst().log("utils", t);
+    }
+
+
     public static void showAlert(String msg, String title, Context context) {
         AlertDialog a = new AlertDialog.Builder(context)
                 .setTitle(title)
@@ -172,45 +177,46 @@ public class Utils {
         String fullPath = path != null ? path + fileName : fileName;
         return new File(contextWrapper.getExternalFilesDir(type), fullPath);
     }
-/*
-    public static void copyAssetsToExternal(AssetManager assetManager, String subDir) {
 
-        String[] files = null;
-        subDir = subDir == null ? "" : subDir;
+    /*
+        public static void copyAssetsToExternal(AssetManager assetManager, String subDir) {
 
-        try {
-            files = assetManager.list(subDir);
-        } catch (IOException e) {
-            Log.e("tag", "Failed to get asset file list.", e);
-        }
+            String[] files = null;
+            subDir = subDir == null ? "" : subDir;
 
-        String extDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-        for (String filename : files) {
-            InputStream in = null;
-            OutputStream out = null;
             try {
-                String extPath = (subDir.length() > 0) ? extDir + "/" + subDir : extDir;
-                File outFile = new File(extPath, filename);
-
-                String assetPath = (subDir.length() > 0) ? "/" + subDir + "/" + filename : filename;
-
-                Log.d("util", "copy " + assetPath + " to " + outFile.getAbsolutePath());
-
-                in = assetManager.open(assetPath);
-                out = new FileOutputStream(outFile);
-
-                copyFile(in, out);
-
-                in.close();
-                out.close();
-
+                files = assetManager.list(subDir);
             } catch (IOException e) {
-                Log.e("tag", "Failed to copy asset file: " + filename, e);
+                l("tag", "Failed to get asset file list.", e);
+            }
+
+            String extDir = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+            for (String filename : files) {
+                InputStream in = null;
+                OutputStream out = null;
+                try {
+                    String extPath = (subDir.length() > 0) ? extDir + "/" + subDir : extDir;
+                    File outFile = new File(extPath, filename);
+
+                    String assetPath = (subDir.length() > 0) ? "/" + subDir + "/" + filename : filename;
+
+                    l( "copy " + assetPath + " to " + outFile.getAbsolutePath());
+
+                    in = assetManager.open(assetPath);
+                    out = new FileOutputStream(outFile);
+
+                    copyFile(in, out);
+
+                    in.close();
+                    out.close();
+
+                } catch (IOException e) {
+                    l("tag", "Failed to copy asset file: " + filename, e);
+                }
             }
         }
-    }
-*/
+    */
     public static void copyAssetsToExternal(AssetManager assetManager, String extDir) {
 
         String[] files = null;
@@ -218,7 +224,7 @@ public class Utils {
         try {
             files = assetManager.list("");
         } catch (IOException e) {
-            Log.e("tag", "Failed to get asset file list.", e);
+            l("Failed to get asset file list.");
         }
 
         //String extDir = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -226,14 +232,14 @@ public class Utils {
         for (String filename : files) {
             InputStream in = null;
             OutputStream out = null;
-            if (!filename.startsWith("images") && !filename.startsWith("sounds") && !filename.startsWith("webkit"))
+            if (!filename.startsWith("images") && !filename.startsWith("sounds") && !filename.startsWith("webkit")) {
                 try {
                     String extPath = extDir;
                     File outFile = new File(extPath, filename);
 
                     String assetPath = filename;
 
-                    Log.d("util", "copy " + assetPath + " to " + outFile.getAbsolutePath());
+                    l("copy " + assetPath + " to " + outFile.getAbsolutePath());
 
                     in = assetManager.open(assetPath);
                     out = new FileOutputStream(outFile);
@@ -245,8 +251,9 @@ public class Utils {
                     out.close();
 
                 } catch (IOException e) {
-                    Log.e("tag", "Failed to copy asset file: " + filename, e);
+                    l("Failed to copy asset file: " + filename);
                 }
+            }
         }
     }
 
@@ -266,7 +273,7 @@ public class Utils {
         try {
             FileInputStream fileInputStream = new FileInputStream(new File(path));
             return file2stringBuffer(fileInputStream);
-        } catch( IOException e) {
+        } catch (IOException e) {
         }
         return null;
     }
@@ -275,7 +282,7 @@ public class Utils {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             return file2stringBuffer(fileInputStream);
-        } catch( IOException e) {
+        } catch (IOException e) {
         }
         return null;
     }
@@ -299,7 +306,7 @@ public class Utils {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(new File(path));
             string2file(fileOutputStream, string);
-        } catch( IOException e) {
+        } catch (IOException e) {
         }
     }
 
@@ -307,7 +314,7 @@ public class Utils {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             string2file(fileOutputStream, string);
-        } catch( IOException e) {
+        } catch (IOException e) {
         }
     }
 
@@ -333,7 +340,7 @@ public class Utils {
             }
         };
         for (File f : dir.listFiles(ff)) {
-            Log.d("util", "delete: " + f.getAbsolutePath());
+            l("delete: " + f.getAbsolutePath());
             f.delete();
         }
     }
@@ -437,14 +444,14 @@ public class Utils {
         for (Object key : extras.keySet()) {
             Object v = extras.get(key);
             String k = (String) key;
-            //Log.d("util", k + " -> " + v);
+            //l( k + " -> " + v);
             Class type = v.getClass();
             if (Parcelable.class.isAssignableFrom(type)) {
                 intent.putExtra(k, (Parcelable) v);
             } else if (Serializable.class.isAssignableFrom(type)) {
                 intent.putExtra(k, (Serializable) v);
             } else if (Integer.class.isAssignableFrom(type)) {
-                //Log.d("util", k + " --------------------- -> " + v);
+                //l( k + " --------------------- -> " + v);
                 intent.putExtra(k, (int) v);
             } else if (Long.class.isAssignableFrom(type)) {
                 intent.putExtra(k, (long) v);
@@ -547,7 +554,7 @@ public class Utils {
                             */
 
 
-                        //Log.d(TAG, "diffy: " + (y2 - lasty2));
+                        //l(TAG, "diffy: " + (y2 - lasty2));
                         lasty2 = y2;
                         break;
                     case MotionEvent.ACTION_UP:
@@ -596,11 +603,11 @@ public class Utils {
     public static boolean oneOfTheseFilesIsBeingUsed(List<String> fileNames) {
         for (String fname : fileNames) {
             if (Utils.filesIsBeingUsed(fname)) {
-                Log.d("fileUtil", fname + " is being used");
+                l(fname + " is being used");
                 return true;
             }
         }
-        Log.d("fileUtil", "No files used !!!!!!!!!!!!!!!!!!!!!!!!!!");
+        l("No files used !!!!!!!!!!!!!!!!!!!!!!!!!!");
         return false;
     }
 
@@ -611,19 +618,19 @@ public class Utils {
         try {
             File file = new File(filename);
             if (file.exists()) {
-                Log.d("fileUtil", filename + " exists");
+                l(filename + " exists");
                 fos = new RandomAccessFile(file, "rw");
             } else {
-                Log.d("fileUtil", filename + " does not exist");
+                l(filename + " does not exist");
             }
         } catch (FileNotFoundException e) {
-            Log.d("fileUtil", filename + " not found");
+            l(filename + " not found");
             isLocked = true;
         } catch (SecurityException e) {
-            Log.d("fileUtil", filename + " got security exception");
+            l(filename + " got security exception");
             isLocked = true;
         } catch (Exception e) {
-            Log.d("fileUtil", filename + " got exception: " + e.getMessage());
+            l(filename + " got exception: " + e.getMessage());
             isLocked = true;
             // handle exception
         } finally {
@@ -631,15 +638,31 @@ public class Utils {
                 if (fos != null) {
                     fos.close();
                 }
-                Log.d("fileUtil", filename + " now closed: " + isLocked);
+                l(filename + " now closed: " + isLocked);
 
             } catch (Exception e) {
                 //handle exception
-                Log.d("fileUtil", filename + " got exception: " + e.getMessage());
+                l(filename + " got exception: " + e.getMessage());
                 isLocked = true;
             }
         }
-        Log.d("fileUtil", filename + " locked: " + isLocked);
+        l(filename + " locked: " + isLocked);
         return isLocked;
+    }
+
+    public static boolean isAllWhiteSpaceOrEmpty(CharSequence charSequence) {
+        return charSequence == null || charSequence.length() == 0 || isAllWhiteSpace(charSequence);
+
+    }
+
+    public static boolean isAllWhiteSpace(CharSequence charSequence) {
+
+        for (int i = 0; i < charSequence.length(); ++i) {
+            char ch = charSequence.charAt(i);
+            if (!Character.isWhitespace(ch)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

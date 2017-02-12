@@ -13,6 +13,8 @@ import java.util.HashSet;
  * Created by jkirkley on 3/21/16.
  */
 public class FilterLog {
+    public static boolean loggingEnabled = true;
+
     Set<String> activeTags;
 
     static FilterLog filterLog = null;
@@ -41,7 +43,7 @@ public class FilterLog {
     }
 
     public void log(String tag, String s) {
-        if(activeTags.contains(tag) && s != null && tag != null) {
+        if(loggingEnabled && activeTags.contains(tag) && s != null && tag != null) {
             Log.d(tag, s);
         }
     }
