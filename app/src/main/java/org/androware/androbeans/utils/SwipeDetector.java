@@ -199,6 +199,10 @@ public class SwipeDetector implements View.OnTouchListener {
         touchListeners.add(touchListener);
     }
 
+    public void clearTouchListeners() {
+        touchListeners.clear();
+    }
+
     public void removeTouchListener(TouchListener touchListener) {
         touchListeners.remove(touchListener);
     }
@@ -259,16 +263,14 @@ public class SwipeDetector implements View.OnTouchListener {
 
                 touchDownTime = (new Date()).getTime() - startTouchDownTime;
 
-
-
                 for(TouchListener touchListener: touchListeners){
                     l("up: " + lastX + ", " + lastY + ", " + touchDownTime);
                     touchListener.onTouchUp(this);
                 }
 
+                touchDownX = newX = lastX = 0;
+                touchDownY = newY = lastY = 0;
 
-                //touchDownX = lastX;
-                //touchDownY = lastY;
 
                 break;
             }
