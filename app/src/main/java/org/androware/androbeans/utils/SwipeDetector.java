@@ -50,7 +50,8 @@ public class SwipeDetector implements View.OnTouchListener {
         float screenHeight = wm.getDefaultDisplay().getHeight();
 
         swipeThreshold = (screenHeight > screenWidth) ? screenHeight / 10 : screenWidth / 10;
-        DX_THRESHOLD = swipeThreshold / 2;
+
+        DX_THRESHOLD = swipeThreshold * 2;
     }
 
     public void setTouchDown(float x, float y) {
@@ -260,6 +261,7 @@ public class SwipeDetector implements View.OnTouchListener {
                 diffY = 0;
 
                 touchDown = false;
+
 
                 touchDownTime = (new Date()).getTime() - startTouchDownTime;
 
