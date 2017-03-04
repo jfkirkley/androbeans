@@ -650,6 +650,16 @@ public class Utils {
         return isLocked;
     }
 
+    public static boolean isAllAlphaWSorPunctuation(CharSequence charSequence) {
+        for (int i = 0; i < charSequence.length(); ++i) {
+            char ch = charSequence.charAt(i);
+            if (!Character.isWhitespace(ch) && !Character.isLetter(ch) && ch != '.' && ch != '?' && ch != '!' && ch != ',') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean isAllWhiteSpaceOrEmpty(CharSequence charSequence) {
         return charSequence == null || charSequence.length() == 0 || isAllWhiteSpace(charSequence);
 

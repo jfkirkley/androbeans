@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static android.R.attr.x;
-import static android.R.attr.y;
 
 /**
  * Created by jkirkley on 2/14/17.
@@ -27,6 +25,7 @@ public class SwipeDetector implements View.OnTouchListener {
 
     private static SwipeDetector instance = null;
     public static float DX_THRESHOLD = 20;
+    public static float DY_THRESHOLD = 20;
     private float swipeThreshold;
 
     private float touchDownX;
@@ -51,12 +50,7 @@ public class SwipeDetector implements View.OnTouchListener {
 
         swipeThreshold = (screenHeight > screenWidth) ? screenHeight / 10 : screenWidth / 10;
 
-        DX_THRESHOLD = swipeThreshold * 2;
-    }
-
-    public void setTouchDown(float x, float y) {
-        touchDownX = x;
-        touchDownY = y;
+        DY_THRESHOLD = DX_THRESHOLD = swipeThreshold / 2;
     }
 
     public boolean isSwiping() {
@@ -64,62 +58,58 @@ public class SwipeDetector implements View.OnTouchListener {
     }
 
     public boolean isHorizontalSwipe() {
-        return isHorizontalSwipe(lastX, lastY);
-    }
-
-    public boolean isHorizontalSwipe(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return Math.abs(xdiff) > Math.abs(ydiff) && Math.abs(xdiff) > swipeThreshold;
+        return Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isVerticalSwipe() {
-        return isVerticalSwipe(lastX, lastY);
+        return Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
-    public boolean isVerticalSwipe(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return Math.abs(xdiff) < Math.abs(ydiff) && Math.abs(ydiff) > swipeThreshold;
+    public static final int START_SWIPE_DENOMINATOR = 20;
+
+    public boolean isStartSwiping() {
+        return isStartHorizontalSwipe() || isStartVerticalSwipe();
     }
+
+    public boolean isStartHorizontalSwipe() {
+        return Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
+    public boolean isStartVerticalSwipe() {
+        return Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
+    public boolean isStartSwipeToRight() {
+        return dx > 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
+    public boolean isStartSwipeToLeft() {
+        return dx < 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
+    public boolean isStartSwipeToTop() {
+        return dy < 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
+    public boolean isStartSwipeToBottom() {
+        return dy > 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
+    }
+
 
     public boolean isSwipeToRight() {
-        return isSwipeToRight(lastX, lastY);
-    }
-    public boolean isSwipeToRight(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return xdiff < 0 && Math.abs(xdiff) > Math.abs(ydiff) && Math.abs(xdiff) > swipeThreshold;
+        return dx > 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isSwipeToLeft() {
-        return isSwipeToLeft(lastX, lastY);
-    }
-
-    public boolean isSwipeToLeft(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return xdiff > 0 && Math.abs(xdiff) > Math.abs(ydiff) && Math.abs(xdiff) > swipeThreshold;
+        return dx < 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isSwipeToTop() {
-        return isSwipeToTop(lastX, lastY);
-    }
-
-    public boolean isSwipeToTop(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return ydiff > 0 && Math.abs(xdiff) < Math.abs(ydiff) && Math.abs(ydiff) > swipeThreshold;
+        return dy < 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
     public boolean isSwipeToBottom() {
-        return isSwipeToBottom(lastX, lastY);
-    }
-
-    public boolean isSwipeToBottom(float x, float y) {
-        float xdiff = touchDownX - x;
-        float ydiff = touchDownY - y;
-        return ydiff < 0 && Math.abs(xdiff) < Math.abs(ydiff) && Math.abs(ydiff) > swipeThreshold;
+        return dy > 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
     public boolean isInRect(RectF rect) {
@@ -152,6 +142,14 @@ public class SwipeDetector implements View.OnTouchListener {
         return diffY;
     }
 
+    public float getDiffXPastThreshold() {
+        return Math.abs(dx) > DX_THRESHOLD? diffX: 0;
+    }
+
+    public float getDiffYPastThreshold() {
+        return Math.abs(dy) > DY_THRESHOLD? diffY: 0;
+    }
+
     public float getDx() {
         return dx;
     }
@@ -182,7 +180,9 @@ public class SwipeDetector implements View.OnTouchListener {
     long touchDownTime;
     long startTouchDownTime = 0;
     boolean touchDown = false;
+    boolean pastSwipeDetectDelay = false;
     public static final long LONG_PRESS_TIME = 500;
+    static final long SWIPE_DETECT_DELAY = 20;
 
     public boolean isLongPress() {
         return touchDownTime > LONG_PRESS_TIME;
@@ -221,47 +221,63 @@ public class SwipeDetector implements View.OnTouchListener {
                 newX = event.getX();
                 newY = event.getY();
 
-                diffX = (lastX - newX) / scale;
-                diffY = (lastY - newY) / scale;
+                diffX = (newX - lastX) / scale;
+                diffY = (newY - lastY) / scale;
 
                 dx += diffX;
                 dy += diffY;
 
+                //l(newY + ", " + lastY + ", " + diffY);
+
                 lastX = newX;
                 lastY = newY;
 
-                for(TouchListener touchListener: touchListeners){
-                    touchListener.onTouchMove(this);
-                }
+                if(!pastSwipeDetectDelay) {
+                    long t = (new Date()).getTime();
+                    pastSwipeDetectDelay = t - touchDownTime > SWIPE_DETECT_DELAY;
+                    if (pastSwipeDetectDelay) {
+                        for(TouchListener touchListener: touchListeners){
+                            touchListener.onTouchDown(this);
+                        }
+                    }
+                } else {
 
+                    for (TouchListener touchListener : touchListeners) {
+                        touchListener.onTouchMove(this);
+                    }
+                }
                 break;
             }
 
             case MotionEvent.ACTION_DOWN: {
 
                 touchDown = true;
-
+                pastSwipeDetectDelay = false;
                 startTouchDownTime = (new Date()).getTime();
 
                 touchDownX = newX = lastX = event.getX();
                 touchDownY = newY = lastY = event.getY();
+                dx = dy = 0;
 
-
+/*
                 for(TouchListener touchListener: touchListeners){
                     l("down: " + touchDownTime + ", " + touchDownY);
                     touchListener.onTouchDown(this);
                 }
-
+*/
                 break;
             }
 
             case MotionEvent.ACTION_UP: {
 
-                diffX = 0;
-                diffY = 0;
+                if (!pastSwipeDetectDelay) {
+                    // very fast touch or managed not to cause a move event -  touch down event has not yet fired, so fire it
+                    for(TouchListener touchListener: touchListeners){
+                        touchListener.onTouchDown(this);
+                    }
+                }
 
                 touchDown = false;
-
 
                 touchDownTime = (new Date()).getTime() - startTouchDownTime;
 
@@ -270,9 +286,12 @@ public class SwipeDetector implements View.OnTouchListener {
                     touchListener.onTouchUp(this);
                 }
 
+                diffX = 0;
+                diffY = 0;
+                dx = dy = 0;
+
                 touchDownX = newX = lastX = 0;
                 touchDownY = newY = lastY = 0;
-
 
                 break;
             }
