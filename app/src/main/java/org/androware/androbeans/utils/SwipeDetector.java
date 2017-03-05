@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -11,6 +12,8 @@ import android.view.WindowManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static android.R.attr.y;
 
 
 /**
@@ -113,11 +116,20 @@ public class SwipeDetector implements View.OnTouchListener {
     }
 
     public boolean isInRect(RectF rect) {
+        Log.d("uni", touchDownX + ", " + touchDownY + " rectF: " + rect);
         return rect.contains(touchDownX, touchDownY);
     }
 
     public boolean below(float y) {
         return lastY < y;
+    }
+
+    public boolean betweenX(float left, float right) {
+        return lastX > left && lastX < right;
+    }
+
+    public boolean betweenY(float top, float bottom) {
+        return lastY > top && lastY < bottom;
     }
 
     float diffX = 0;
