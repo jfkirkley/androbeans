@@ -3,6 +3,7 @@ package org.androware.androbeans.utils;
 import android.content.ContextWrapper;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Debug;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -63,6 +64,12 @@ public class Utils {
 
     public static void l(String t) {
         FilterLog.inst().log("utils", t);
+    }
+
+
+    public static void startMethodTracing(ContextWrapper contextWrapper, String logName) {
+        String fname = Utils.getExternalFile(contextWrapper, null, null, logName).getAbsolutePath();
+        Debug.startMethodTracing(fname);
     }
 
 
