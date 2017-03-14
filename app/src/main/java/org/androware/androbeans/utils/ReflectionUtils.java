@@ -206,6 +206,30 @@ public class ReflectionUtils {
         return toInvoke;
     }
 
+    public static Constructor findMatchingConstructor(Class cls, Object... params) {
+        Constructor[] constructors = cls.getConstructors();
+
+        for (Constructor constructor : constructors) {
+
+            Class<?>[] paramTypes = constructor.getParameterTypes();
+            if (params == null && paramTypes == null) {
+                return constructor;
+
+            } else if (params == null || paramTypes == null
+                    || paramTypes.length != params.length) {
+                continue;
+            }
+
+            for (int i = 0; i < params.length; ++i) {
+                if (!paramTypes[i].isAssignableFrom(params[i].getClass())) {
+                    continue;
+                }
+            }
+            return constructor;
+        }
+        return null;
+    }
+
 /*
     public static Method getMethodFromArgs(Class c, String methodName, Object... args) {
 
@@ -258,6 +282,27 @@ public class ReflectionUtils {
         return null;
     }
 
+    // WARNING, arg classes must match exactly, prefer findMatchingConstructor(getClass(className), args);
+    public static Constructor getConstructorFromArgs(Class c, Object... args) {
+
+        if(c != null) {
+            try {
+                Class[] classes = new Class[args.length];
+                int i = 0;
+                for (Object arg : args) {
+                    classes[i++] = arg.getClass();
+                }
+                return c.getConstructor(classes);
+            } catch (NoSuchMethodException e) {
+            }
+        }
+        return null;
+    }
+
+    public static Constructor getConstructorFromArgs(String className, Object... args) {
+        return findMatchingConstructor(getClass(className), args);
+    }
+
     public static Constructor getConstructor(Class c, Class... args) {
 
         try {
@@ -271,6 +316,20 @@ public class ReflectionUtils {
 
     }
 
+    public static Object newInstance(String className, Object... args) {
+        try {
+            Constructor constructor = getConstructorFromArgs(className, args);
+            if(constructor != null) {
+                return constructor.newInstance(args);
+            }
+
+        } catch (InstantiationException e) {
+        } catch (IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
+        }
+        return null;
+
+    }
     // returns a copy if there is a copy constructor.  Otherwise, just returns the same object
     public static Object tryCopy(Object object){
         Constructor constructor = getConstructor(object.getClass(), object.getClass());
