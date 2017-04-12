@@ -660,7 +660,7 @@ public class Utils {
     public static boolean isAllAlphaWSorPunctuation(CharSequence charSequence) {
         for (int i = 0; i < charSequence.length(); ++i) {
             char ch = charSequence.charAt(i);
-            if (!Character.isWhitespace(ch) && !Character.isLetter(ch) && ch != '.' && ch != '?' && ch != '!' && ch != ',') {
+            if (!Character.isWhitespace(ch) && !Character.isLetter(ch) && ch != '.' && ch != '?' && ch != '!' && ch != ',' && ch != ';' && ch != ':' && ch != '\b') {
                 return false;
             }
         }

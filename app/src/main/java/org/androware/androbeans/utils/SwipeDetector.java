@@ -2,6 +2,7 @@ package org.androware.androbeans.utils;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
@@ -19,7 +20,7 @@ import static android.R.attr.y;
 /**
  * Created by jkirkley on 2/14/17.
  */
-public class SwipeDetector implements View.OnTouchListener {
+public class SwipeDetector implements View.OnTouchListener, GestureHandler.FlingListener {
     public static final String TAG = "swipe";
 
     public void l(String t) {
@@ -34,19 +35,26 @@ public class SwipeDetector implements View.OnTouchListener {
     private float touchDownX;
     private float touchDownY;
 
+    private GestureHandler gestureHandler;
+
     public static SwipeDetector inst() {
-        return inst(null);
+        return inst(null, null);
     }
 
-    public static SwipeDetector inst(ContextWrapper contextWrapper) {
+    public static SwipeDetector inst(ContextWrapper contextWrapper, GestureHandler.GestureClient gestureClient) {
         if (instance == null) {
-            instance = new SwipeDetector(contextWrapper);
+            instance = new SwipeDetector(contextWrapper, gestureClient);
         }
         return instance;
     }
 
-    public SwipeDetector(ContextWrapper contextWrapper) {
+
+    public SwipeDetector(ContextWrapper contextWrapper, GestureHandler.GestureClient gestureClient) {
         WindowManager wm = (WindowManager) contextWrapper.getSystemService(Context.WINDOW_SERVICE);
+
+        if(gestureClient != null) {
+            gestureHandler = new GestureHandler(contextWrapper, gestureClient);
+        }
 
         float screenWidth = wm.getDefaultDisplay().getWidth();
         float screenHeight = wm.getDefaultDisplay().getHeight();
@@ -178,6 +186,13 @@ public class SwipeDetector implements View.OnTouchListener {
         return touchDownY;
     }
 
+    public int getFlingX() {
+        return this.gestureHandler.getCurrX();
+    }
+
+    public int getFlingY() {
+        return this.gestureHandler.getCurrY();
+    }
 
     public boolean isTouchDown() {
         return touchDown;
@@ -199,6 +214,7 @@ public class SwipeDetector implements View.OnTouchListener {
     public boolean isLongPress() {
         return touchDownTime > LONG_PRESS_TIME;
     }
+
 
     public interface TouchListener {
         public void onTouchDown(SwipeDetector swipeDetector);
@@ -224,6 +240,8 @@ public class SwipeDetector implements View.OnTouchListener {
     public boolean onTouch(View v, MotionEvent event) {
         boolean handledInput = false;
         final int action = MotionEventCompat.getActionMasked(event);
+
+        gestureHandler.onTouchEvent(event);
 
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
@@ -271,6 +289,7 @@ public class SwipeDetector implements View.OnTouchListener {
                 touchDownY = newY = lastY = event.getY();
                 dx = dy = 0;
 
+
 /*
                 for(TouchListener touchListener: touchListeners){
                     l("down: " + touchDownTime + ", " + touchDownY);
@@ -289,21 +308,9 @@ public class SwipeDetector implements View.OnTouchListener {
                     }
                 }
 
-                touchDown = false;
-
-                touchDownTime = (new Date()).getTime() - startTouchDownTime;
-
-                for(TouchListener touchListener: touchListeners){
-                    l("up: " + lastX + ", " + lastY + ", " + touchDownTime);
-                    touchListener.onTouchUp(this);
+                if(!gestureHandler.isFlinging()) {
+                    handleTouchUp();
                 }
-
-                diffX = 0;
-                diffY = 0;
-                dx = dy = 0;
-
-                touchDownX = newX = lastX = 0;
-                touchDownY = newY = lastY = 0;
 
                 break;
             }
@@ -312,4 +319,36 @@ public class SwipeDetector implements View.OnTouchListener {
         return handledInput;
     }
 
+    @Override
+    public void onFlingEnd(GestureHandler gestureHandler) {
+        handleTouchUp();
+    }
+
+    private void handleTouchUp() {
+        touchDown = false;
+
+        touchDownTime = (new Date()).getTime() - startTouchDownTime;
+
+        for(TouchListener touchListener: touchListeners){
+            l("up: " + lastX + ", " + lastY + ", " + touchDownTime);
+            touchListener.onTouchUp(this);
+        }
+
+        diffX = 0;
+        diffY = 0;
+        dx = dy = 0;
+
+        touchDownX = newX = lastX = 0;
+        touchDownY = newY = lastY = 0;
+
+    }
+
+
+    public void computeScroll() {
+        gestureHandler.computeScroll();
+    }
+
+    public void doDraw(Canvas canvas) {
+        this.gestureHandler.onDraw(canvas);
+    }
 }
