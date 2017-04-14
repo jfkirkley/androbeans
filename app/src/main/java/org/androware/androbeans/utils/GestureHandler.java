@@ -6,9 +6,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.EdgeEffectCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -16,6 +20,7 @@ import android.widget.OverScroller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by jkirkley on 4/12/17.
@@ -44,6 +49,11 @@ public class GestureHandler {
 
     private int currX = 0;
     private int currY = 0;
+    private int startX = 0;
+    private int startY = 0;
+
+    private int dX = 0;
+    private int dY = 0;
 
 
     // Current attribute values and Paints.
@@ -67,6 +77,8 @@ public class GestureHandler {
     float screenWidth;
     float screenHeight;
 
+    private Handler uiThreadHandler;
+
     private GestureClient gestureClient;
 
     // Buffers for storing current X and Y stops. See the computeAxisStops method for more details.
@@ -80,6 +92,8 @@ public class GestureHandler {
     protected static float fun(float x) {
         return (float) Math.pow(x, 3) - x / 4;
     }
+
+    Thread flingCheckerThread;
 
     public GestureHandler(Context context, GestureClient gestureClient) {
 
@@ -100,7 +114,18 @@ public class GestureHandler {
         mEdgeEffectRight = new EdgeEffectCompat(context);
         mEdgeEffectBottom = new EdgeEffectCompat(context);
 
-        new Thread(new FlingEndChecker()).start();
+        Log.d("g", "New Gesture Handler !!!");
+
+        flingCheckerThread = new Thread(new FlingEndChecker());
+        flingCheckerThread.start();
+
+        uiThreadHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message inputMessage) {
+                callFlingListeners();
+                resetDxDy();
+            }
+        };
     }
 
 
@@ -273,8 +298,21 @@ public class GestureHandler {
 
         releaseEdgeEffects();
 
+        resetDxDy();
+        startX = currX;
+        startY = currY;
 
         mScroller.forceFinished(true);
+
+        Log.d("g", "fling: " +
+                currX + ", " +
+                currY + ", " +
+                velocityX + ", " +
+                velocityY + ", " +
+                0 + ", " + gestureClient.getScrollXRange() + ", " +
+                0 + ", " + gestureClient.getScrollYRange());
+
+
         mScroller.fling(
                 currX,
                 currY,
@@ -286,6 +324,18 @@ public class GestureHandler {
         ViewCompat.postInvalidateOnAnimation(gestureClient.getView());
     }
 
+    public void resetDxDy() {
+        dX = dY = 0;
+    }
+
+    public void resetCurrXY() {
+        resetCurrXY(0, 0);
+    }
+
+    public void resetCurrXY(int x, int y) {
+        currX = x;
+        currY = y;
+    }
 
     public void computeScroll() {
 
@@ -297,12 +347,17 @@ public class GestureHandler {
             currX = mScroller.getCurrX();
             currY = mScroller.getCurrY();
 
+            Log.d("g", currX + ", " + currY);
+
+            dX = currX - startX;
+            dY = currY - startY;
+
             if (currX < 0 && mEdgeEffectLeft.isFinished() && !mEdgeEffectLeftActive) {
 
                 mEdgeEffectLeft.onAbsorb((int) getCurrVelocity(mScroller));
                 mEdgeEffectLeftActive = true;
 
-            } else if ( currX > gestureClient.getScrollXRange() && mEdgeEffectRight.isFinished() && !mEdgeEffectRightActive) {
+            } else if (currX > gestureClient.getScrollXRange() && mEdgeEffectRight.isFinished() && !mEdgeEffectRightActive) {
 
                 mEdgeEffectRight.onAbsorb((int) getCurrVelocity(mScroller));
                 mEdgeEffectRightActive = true;
@@ -357,10 +412,11 @@ public class GestureHandler {
         }
 
 
+        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         @Override
         public void run() {
 
-            long sleepTime = 100;
+            long sleepTime = 400;
 
             boolean wasFlinging = false;
 
@@ -371,17 +427,28 @@ public class GestureHandler {
 
                     boolean nowFlinging = isFlinging();
 
-                    if(wasFlinging && !nowFlinging) {
-                        callFlingListeners();
+                    //Log.d("g", "f: " + nowFlinging + " <> " + wasFlinging + " : " + mScroller.getCurrVelocity());
+
+                    if (wasFlinging && !nowFlinging) {
+                        //Log.d("g", "fling done !!!!!!!!!!!");
+                        Message completeMessage = uiThreadHandler.obtainMessage(0, null);
+                        completeMessage.sendToTarget();
+
                     }
 
                     wasFlinging = nowFlinging;
 
                 } catch (InterruptedException e) {
+
                     break;
                 }
             }
+            Log.d("g", "fling checker thread done !!!!!!!!!!!");
         }
+    }
+
+    public void stopFlingCheckerThread() {
+        flingCheckerThread.interrupt();
     }
 
     public void addFlingListener(FlingListener flingListener) {
@@ -389,9 +456,19 @@ public class GestureHandler {
     }
 
     private void callFlingListeners() {
-        for(FlingListener flingListener: flingListeners) {
+        for (FlingListener flingListener : flingListeners) {
             flingListener.onFlingEnd(this);
         }
     }
+
+    public int getdX() {
+        return -dX;
+    }
+
+    public int getdY() {
+        return -dY;
+    }
+
+
 
 }

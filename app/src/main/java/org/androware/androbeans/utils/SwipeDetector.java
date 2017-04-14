@@ -54,6 +54,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
         if(gestureClient != null) {
             gestureHandler = new GestureHandler(contextWrapper, gestureClient);
+            gestureHandler.addFlingListener(this);
         }
 
         float screenWidth = wm.getDefaultDisplay().getWidth();
@@ -69,10 +70,14 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public boolean isHorizontalSwipe() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isVerticalSwipe() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
@@ -83,48 +88,70 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public boolean isStartHorizontalSwipe() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
     public boolean isStartVerticalSwipe() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
+
         return Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
     public boolean isStartSwipeToRight() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
+
         return dx > 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
     public boolean isStartSwipeToLeft() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dx < 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
     public boolean isStartSwipeToTop() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dy < 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
     public boolean isStartSwipeToBottom() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dy > 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
 
     public boolean isSwipeToRight() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dx > 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isSwipeToLeft() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dx < 0 && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold;
     }
 
     public boolean isSwipeToTop() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dy < 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
     public boolean isSwipeToBottom() {
+        //float dx = gestureHandler == null? 0: gestureHandler.getdX();
+        //float dy = gestureHandler == null? 0: gestureHandler.getdY();
         return dy > 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
     public boolean isInRect(RectF rect) {
-        Log.d("uni", touchDownX + ", " + touchDownY + " rectF: " + rect);
+        //Log.d("uni", touchDownX + ", " + touchDownY + " rectF: " + rect);
         return rect.contains(touchDownX, touchDownY);
     }
 
@@ -187,11 +214,19 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public int getFlingX() {
-        return this.gestureHandler.getCurrX();
+        return gestureHandler == null? 0: this.gestureHandler.getCurrX();
     }
 
     public int getFlingY() {
-        return this.gestureHandler.getCurrY();
+        return gestureHandler == null? 0: this.gestureHandler.getCurrY();
+    }
+
+    public int getFlingDX() {
+        return gestureHandler == null? 0: this.gestureHandler.getdX();
+    }
+
+    public int getFlingDY() {
+        return gestureHandler == null? 0: this.gestureHandler.getdY();
     }
 
     public boolean isTouchDown() {
@@ -236,6 +271,10 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         touchListeners.remove(touchListener);
     }
 
+    public void flingReset(int x, int y) {
+        gestureHandler.resetCurrXY(x, y);
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         boolean handledInput = false;
@@ -258,6 +297,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
                 dy += diffY;
 
                 //l(newY + ", " + lastY + ", " + diffY);
+                //Log.d("x", "dx, dy: " + dx + ", " + dy);
 
                 lastX = newX;
                 lastY = newY;
@@ -345,10 +385,42 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
 
     public void computeScroll() {
-        gestureHandler.computeScroll();
+        synchronized (this) {
+            if (gestureHandler != null) {
+                gestureHandler.computeScroll();
+            }
+        }
     }
 
     public void doDraw(Canvas canvas) {
-        this.gestureHandler.onDraw(canvas);
+        synchronized (this) {
+            if (gestureHandler != null) {
+                this.gestureHandler.onDraw(canvas);
+            }
+        }
+    }
+
+    private synchronized void destroyGestureHandlerInternal() {
+        this.gestureHandler.stopFlingCheckerThread();
+        this.gestureHandler = null;
+        instance = null;
+        System.gc();
+    }
+
+    public static void destroyGestureHandler() {
+        if(instance != null) {
+            instance.destroyGestureHandlerInternal();
+        }
+    }
+
+    public synchronized GestureHandler getGestureHandlerInternal() {
+        return gestureHandler;
+    }
+
+    public static GestureHandler getGestureHandler() {
+        if(instance != null) {
+            return instance.getGestureHandlerInternal();
+        }
+        return null;
     }
 }
