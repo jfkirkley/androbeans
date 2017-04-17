@@ -115,10 +115,7 @@ public class GestureHandler {
         mEdgeEffectRight = new EdgeEffectCompat(context);
         mEdgeEffectBottom = new EdgeEffectCompat(context);
 
-        Log.d("g", "New Gesture Handler !!!");
 
-        flingCheckerThread = new Thread(new FlingEndChecker());
-        //flingCheckerThread.start();
 
         uiThreadHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -294,13 +291,11 @@ public class GestureHandler {
         mEdgeEffectBottom.onRelease();
     }
 
-    long flingStartTime;
 
     private void fling(int velocityX, int velocityY) {
 
         releaseEdgeEffects();
 
-        flingStartTime = SystemClock.currentThreadTimeMillis();
 
         resetDxDy();
         startX = currX;
@@ -316,7 +311,7 @@ public class GestureHandler {
                 0, gestureClient.getScrollXRange(),
                 0, gestureClient.getScrollYRange());
 
-
+///*
         Log.d("g", "fling: " + mScroller.getFinalX() + " , " + mScroller.getFinalY() + " :: " +
                 currX + ", " +
                 currY + ", " +
@@ -324,8 +319,7 @@ public class GestureHandler {
                 velocityY + ", " +
                 0 + ", " + gestureClient.getScrollXRange() + ", " +
                 0 + ", " + gestureClient.getScrollYRange());
-
-        setNowFlinging(true);
+//*/
 
         ViewCompat.postInvalidateOnAnimation(gestureClient.getView());
     }
@@ -353,19 +347,15 @@ public class GestureHandler {
             currX = mScroller.getCurrX();
             currY = mScroller.getCurrY();
 
-            long nt = SystemClock.currentThreadTimeMillis();
             //Log.d("g", currX + ", " + currY + " : " + (nt - flingStartTime));
 
             if(currX == mScroller.getFinalX() && currY == mScroller.getFinalY() ) {
-                Log.d("g", "done fling! ------------------------ !! -------------- !! ");
+
                 Message completeMessage = uiThreadHandler.obtainMessage(0, null);
                 completeMessage.sendToTarget();
                 mScroller.forceFinished(true);
-                //callFlingListeners();
-                //resetDxDy();
-            }
 
-            flingStartTime = nt;
+            }
 
             dX = currX - startX;
             dY = currY - startY;
@@ -423,76 +413,6 @@ public class GestureHandler {
         return !mScroller.isFinished();
     }
 
-    public synchronized boolean isNowFlinging() {
-        return nowFlinging;
-    }
-
-    public synchronized void setNowFlinging(boolean nowFlinging) {
-        this.nowFlinging = nowFlinging;
-    }
-
-    boolean nowFlinging = false;
-
-    public class FlingEndChecker implements Runnable {
-
-        public FlingEndChecker() {
-
-        }
-
-        @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-        @Override
-        public void run() {
-
-            long sleepTime = 400;
-
-            boolean wasFlinging = false;
-            int cnt = 0;
-
-            long totalFlingTime = 0;
-
-            while (true) {
-                try {
-
-                    Thread.sleep(sleepTime);
-
-                    setNowFlinging(isFlinging());
-
-                    if(cnt++ % 10 == 0) {
-                        Log.d("g", "f: " + nowFlinging + " <> " + wasFlinging + " : " + totalFlingTime);
-                    }
-
-                    if(isNowFlinging()) {
-                        totalFlingTime += sleepTime;
-                    }
-
-                    if ((wasFlinging && !isNowFlinging()) || totalFlingTime > 2000) {
-
-                        Log.d("g", "fling done !!!!!!!!!!!"  + nowFlinging + " <> " + wasFlinging + " : " + totalFlingTime);
-
-                        mScroller.forceFinished(true);
-                        setNowFlinging(false);
-
-                        Message completeMessage = uiThreadHandler.obtainMessage(0, null);
-                        completeMessage.sendToTarget();
-
-                        totalFlingTime = 0;
-                    }
-
-                    wasFlinging = nowFlinging;
-
-                } catch (InterruptedException e) {
-
-                    break;
-                }
-            }
-            Log.d("g", "fling checker thread done !!!!!!!!!!!");
-        }
-    }
-
-    public void stopFlingCheckerThread() {
-        flingCheckerThread.interrupt();
-    }
-
     public void addFlingListener(FlingListener flingListener) {
         flingListeners.add(flingListener);
     }
@@ -509,6 +429,14 @@ public class GestureHandler {
 
     public int getdY() {
         return -dY;
+    }
+
+    public void setCurrX(int currX) {
+        this.currX = currX;
+    }
+
+    public void setCurrY(int currY) {
+        this.currY = currY;
     }
 
 

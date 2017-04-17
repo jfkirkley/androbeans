@@ -401,10 +401,6 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     private synchronized void destroyGestureHandlerInternal() {
-        if(gestureHandler != null) {
-            this.gestureHandler.stopFlingCheckerThread();
-            Log.d("g", "stopped the gesture handler and nullified it!!!!!!!!!!!!!!!!!!!!!!!");
-        }
         this.gestureHandler = null;
         instance = null;
         System.gc();
