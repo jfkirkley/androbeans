@@ -9,11 +9,11 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.SystemClock;
+
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.EdgeEffectCompat;
-import android.util.Log;
+
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,6 +21,8 @@ import android.widget.OverScroller;
 
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 
 /**
@@ -94,7 +96,6 @@ public class GestureHandler {
         return (float) Math.pow(x, 3) - x / 4;
     }
 
-    Thread flingCheckerThread;
 
     public GestureHandler(Context context, GestureClient gestureClient) {
 
@@ -311,7 +312,7 @@ public class GestureHandler {
                 0, gestureClient.getScrollXRange(),
                 0, gestureClient.getScrollYRange());
 
-///*
+/*
         Log.d("g", "fling: " + mScroller.getFinalX() + " , " + mScroller.getFinalY() + " :: " +
                 currX + ", " +
                 currY + ", " +
@@ -319,10 +320,18 @@ public class GestureHandler {
                 velocityY + ", " +
                 0 + ", " + gestureClient.getScrollXRange() + ", " +
                 0 + ", " + gestureClient.getScrollYRange());
-//*/
+
+*/
+        xTolerance = Math.abs(mScroller.getFinalX() - currX)*0.02f;
+        yTolerance = Math.abs(mScroller.getFinalY() - currY)*0.02f;
+
 
         ViewCompat.postInvalidateOnAnimation(gestureClient.getView());
     }
+
+    private float xTolerance = 0;
+    private float yTolerance = 0;
+
 
     public void resetDxDy() {
         dX = dY = 0;
@@ -337,6 +346,7 @@ public class GestureHandler {
         currY = y;
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void computeScroll() {
 
 
@@ -349,7 +359,12 @@ public class GestureHandler {
 
             //Log.d("g", currX + ", " + currY + " : " + (nt - flingStartTime));
 
-            if(currX == mScroller.getFinalX() && currY == mScroller.getFinalY() ) {
+            float fy = Math.abs(mScroller.getFinalY() - currY);
+            float fx = Math.abs(mScroller.getFinalX() - currX);
+
+            //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy );//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
+
+            if(fx <= xTolerance && fy <= yTolerance) {
 
                 Message completeMessage = uiThreadHandler.obtainMessage(0, null);
                 completeMessage.sendToTarget();
