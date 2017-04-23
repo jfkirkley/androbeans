@@ -37,6 +37,8 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
     private GestureHandler gestureHandler;
 
+    public static boolean isPortraitMode = false;
+
     public static SwipeDetector inst() {
         return inst(null, null);
     }
@@ -59,6 +61,8 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
         float screenWidth = wm.getDefaultDisplay().getWidth();
         float screenHeight = wm.getDefaultDisplay().getHeight();
+
+        isPortraitMode = screenWidth > screenHeight;
 
         swipeThreshold = (screenHeight > screenWidth) ? screenHeight / 10 : screenWidth / 10;
 

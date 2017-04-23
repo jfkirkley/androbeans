@@ -14,6 +14,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.EdgeEffectCompat;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -48,6 +49,8 @@ public class GestureHandler {
     }
 
     private List<FlingListener> flingListeners = new ArrayList<>();
+
+    private static final float TOLERANCE = 0.1f;
 
 
     private int currX = 0;
@@ -320,10 +323,14 @@ public class GestureHandler {
                 velocityY + ", " +
                 0 + ", " + gestureClient.getScrollXRange() + ", " +
                 0 + ", " + gestureClient.getScrollYRange());
-
 */
-        xTolerance = Math.abs(mScroller.getFinalX() - currX)*0.02f;
-        yTolerance = Math.abs(mScroller.getFinalY() - currY)*0.02f;
+
+        Log.d("g", "flingX: " + mScroller.getFinalX() + " , " + currX + ", " + velocityX + ", " + 0 + ", " + gestureClient.getScrollXRange() );
+        Log.d("g", "flingY: " + mScroller.getFinalY() + " , " + currY + ", " + velocityY + ", " + 0 + ", " + gestureClient.getScrollYRange() );
+
+//*/
+        xTolerance = Math.abs(mScroller.getFinalX() - currX)*TOLERANCE;
+        yTolerance = Math.abs(mScroller.getFinalY() - currY)*TOLERANCE;
 
 
         ViewCompat.postInvalidateOnAnimation(gestureClient.getView());
@@ -362,7 +369,7 @@ public class GestureHandler {
             float fy = Math.abs(mScroller.getFinalY() - currY);
             float fx = Math.abs(mScroller.getFinalX() - currX);
 
-            //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy );//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
+            //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy  + " :: " + currX + ", " + currY);//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
 
             if(fx <= xTolerance && fy <= yTolerance) {
 
