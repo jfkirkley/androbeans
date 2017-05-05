@@ -62,7 +62,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         float screenWidth = wm.getDefaultDisplay().getWidth();
         float screenHeight = wm.getDefaultDisplay().getHeight();
 
-        isPortraitMode = screenWidth > screenHeight;
+        isPortraitMode = screenWidth < screenHeight;
 
         swipeThreshold = (screenHeight > screenWidth) ? screenHeight / 10 : screenWidth / 10;
 
@@ -85,7 +85,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         return Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold;
     }
 
-    public static final int START_SWIPE_DENOMINATOR = 20;
+    public static final int START_SWIPE_DENOMINATOR = 10;
 
     public boolean isStartSwiping() {
         return isStartHorizontalSwipe() || isStartVerticalSwipe();
@@ -126,6 +126,9 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     public boolean isStartSwipeToBottom() {
         //float dx = gestureHandler == null? 0: gestureHandler.getdX();
         //float dy = gestureHandler == null? 0: gestureHandler.getdY();
+
+        //Log.d("uni", "tdown dx dy: " + dx + ", " + dy + " ?>? " + (swipeThreshold/START_SWIPE_DENOMINATOR));
+
         return dy > 0 && Math.abs(dx) < Math.abs(dy) && Math.abs(dy) > swipeThreshold/START_SWIPE_DENOMINATOR;
     }
 
@@ -248,7 +251,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     boolean touchDown = false;
     boolean pastSwipeDetectDelay = false;
     public static final long LONG_PRESS_TIME = 500;
-    static final long SWIPE_DETECT_DELAY = 20;
+    static final long SWIPE_DETECT_DELAY = 50;
 
     public boolean isLongPress() {
         return touchDownTime > LONG_PRESS_TIME;
@@ -289,78 +292,87 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
 
-                float scale = .75f;  // TODO should be configurable (sensitivity setting)
-
-                newX = event.getX();
-                newY = event.getY();
-
-                diffX = (newX - lastX) / scale;
-                diffY = (newY - lastY) / scale;
-
-                dx += diffX;
-                dy += diffY;
-
-                //l(newY + ", " + lastY + ", " + diffY);
-                //Log.d("x", "dx, dy: " + dx + ", " + dy);
-
-                lastX = newX;
-                lastY = newY;
-
-                if(!pastSwipeDetectDelay) {
-                    long t = (new Date()).getTime();
-                    pastSwipeDetectDelay = t - touchDownTime > SWIPE_DETECT_DELAY;
-                    if (pastSwipeDetectDelay) {
-                        for(TouchListener touchListener: touchListeners){
-                            touchListener.onTouchDown(this);
-                        }
-                    }
-                } else {
-
-                    for (TouchListener touchListener : touchListeners) {
-                        touchListener.onTouchMove(this);
-                    }
-                }
+                doTouchMmove(event.getX(), event.getY());
                 break;
             }
 
             case MotionEvent.ACTION_DOWN: {
 
-                touchDown = true;
-                pastSwipeDetectDelay = false;
-                startTouchDownTime = (new Date()).getTime();
-
-                touchDownX = newX = lastX = event.getX();
-                touchDownY = newY = lastY = event.getY();
-                dx = dy = 0;
-
-
-/*
-                for(TouchListener touchListener: touchListeners){
-                    l("down: " + touchDownTime + ", " + touchDownY);
-                    touchListener.onTouchDown(this);
-                }
-*/
+                doTouchDown(event.getX(), event.getY());
                 break;
             }
 
             case MotionEvent.ACTION_UP: {
 
-                if (!pastSwipeDetectDelay) {
-                    // very fast touch or managed not to cause a move event -  touch down event has not yet fired, so fire it
-                    for(TouchListener touchListener: touchListeners){
-                        touchListener.onTouchDown(this);
-                    }
-                }
-
-                if(!gestureHandler.isFlinging()) {
-                    handleTouchUp();
-                }
-
+                doTouchUp();
                 break;
             }
         }
 
         return handledInput;
+    }
+
+    public void doTouchDown(float ex, float ey) {
+        touchDown = true;
+        pastSwipeDetectDelay = false;
+        startTouchDownTime = (new Date()).getTime();
+
+        touchDownX = newX = lastX = ex;
+        touchDownY = newY = lastY = ey;
+        dx = dy = 0;
+        //Log.d("uni", "ontdown dx dy: " + dx + ", " + dy + " :: " + ex + ", " + ey);
+    }
+
+    public void doTouchMmove(float ex, float ey) {
+        float scale = .75f;  // TODO should be configurable (sensitivity setting)
+
+        newX = ex;
+        newY = ey;
+
+        diffX = (newX - lastX) / scale;
+        diffY = (newY - lastY) / scale;
+
+        dx += diffX;
+        dy += diffY;
+
+        //l(newY + ", " + lastY + ", " + diffY);
+        //Log.d("x", "dx, dy: " + dx + ", " + dy);
+
+        lastX = newX;
+        lastY = newY;
+
+
+        if(!pastSwipeDetectDelay) {
+            long t = (new Date()).getTime();
+            //Log.d("uni", (t - startTouchDownTime) + " >? " + SWIPE_DETECT_DELAY + " ** movetdown dx dy: " + dx + ", " + dy + " :: " + ex + ", " + ey);
+
+            pastSwipeDetectDelay = t - startTouchDownTime > SWIPE_DETECT_DELAY;
+            if (pastSwipeDetectDelay) {
+                for(TouchListener touchListener: touchListeners){
+                    touchListener.onTouchDown(this);
+                }
+            }
+        } else {
+
+            for (TouchListener touchListener : touchListeners) {
+                touchListener.onTouchMove(this);
+            }
+        }
+
+    }
+
+    public void doTouchUp() {
+        if (!pastSwipeDetectDelay) {
+            // very fast touch or managed not to cause a move event -  touch down event has not yet fired, so fire it
+            for(TouchListener touchListener: touchListeners){
+                touchListener.onTouchDown(this);
+            }
+        }
+
+        if(!gestureHandler.isFlinging()) {
+            handleTouchUp();
+        }
+
     }
 
     @Override
