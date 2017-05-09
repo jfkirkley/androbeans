@@ -297,8 +297,14 @@ public class GestureHandler {
         mEdgeEffectBottom.onRelease();
     }
 
+    public final static int VELOCITY_THRESHOLD = 3000;
+
 
     private void fling(int velocityX, int velocityY) {
+
+        if(Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
+            return;   // this stops weak touch movements from causing flings.
+        }
 
         releaseEdgeEffects();
 

@@ -5,7 +5,6 @@ import android.content.ContextWrapper;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -13,8 +12,6 @@ import android.view.WindowManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static android.R.attr.y;
 
 
 /**
@@ -30,6 +27,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     private static SwipeDetector instance = null;
     public static float DX_THRESHOLD = 20;
     public static float DY_THRESHOLD = 20;
+
     private float swipeThreshold;
 
     private float touchDownX;
@@ -246,7 +244,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     float newX;
     float newY;
 
-    long touchDownTime;
+    long touchDownDuration;
     long startTouchDownTime = 0;
     boolean touchDown = false;
     boolean pastSwipeDetectDelay = false;
@@ -254,12 +252,12 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     static final long SWIPE_DETECT_DELAY = 50;
 
     public boolean isLongPress() {
-        return touchDownTime > LONG_PRESS_TIME;
+        return touchDownDuration > LONG_PRESS_TIME;
     }
 
 
     public interface TouchListener {
-        public void onTouchDown(SwipeDetector swipeDetector);
+        public void onTouchDown(SwipeDetector swipeDetector, boolean isDelayed);
         public void onTouchMove(SwipeDetector swipeDetector);
         public void onTouchUp(SwipeDetector swipeDetector);
     }
@@ -320,6 +318,11 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         touchDownX = newX = lastX = ex;
         touchDownY = newY = lastY = ey;
         dx = dy = 0;
+
+        for(TouchListener touchListener: touchListeners){
+            touchListener.onTouchDown(this, false);
+        }
+
         //Log.d("uni", "ontdown dx dy: " + dx + ", " + dy + " :: " + ex + ", " + ey);
     }
 
@@ -349,7 +352,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
             pastSwipeDetectDelay = t - startTouchDownTime > SWIPE_DETECT_DELAY;
             if (pastSwipeDetectDelay) {
                 for(TouchListener touchListener: touchListeners){
-                    touchListener.onTouchDown(this);
+                    touchListener.onTouchDown(this, true);
                 }
             }
         } else {
@@ -365,7 +368,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         if (!pastSwipeDetectDelay) {
             // very fast touch or managed not to cause a move event -  touch down event has not yet fired, so fire it
             for(TouchListener touchListener: touchListeners){
-                touchListener.onTouchDown(this);
+                touchListener.onTouchDown(this, true);
             }
         }
 
@@ -383,10 +386,10 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     private void handleTouchUp() {
         touchDown = false;
 
-        touchDownTime = (new Date()).getTime() - startTouchDownTime;
+        touchDownDuration = (new Date()).getTime() - startTouchDownTime;
 
         for(TouchListener touchListener: touchListeners){
-            l("up: " + lastX + ", " + lastY + ", " + touchDownTime);
+            l("up: " + lastX + ", " + lastY + ", " + touchDownDuration);
             touchListener.onTouchUp(this);
         }
 
