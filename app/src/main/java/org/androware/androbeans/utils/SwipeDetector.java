@@ -24,7 +24,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         FilterLog.inst().log(TAG, t);
     }
 
-    private static SwipeDetector instance = null;
+    public static SwipeDetector instance = null;
     public static float DX_THRESHOLD = 20;
     public static float DY_THRESHOLD = 20;
 
@@ -246,6 +246,8 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
     long touchDownDuration;
     long startTouchDownTime = 0;
+
+
     boolean touchDown = false;
     boolean pastSwipeDetectDelay = false;
     public static final long LONG_PRESS_TIME = 500;
@@ -290,7 +292,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
 
-                doTouchMmove(event.getX(), event.getY());
+                doTouchMove(event.getX(), event.getY());
                 break;
             }
 
@@ -326,7 +328,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         //Log.d("uni", "ontdown dx dy: " + dx + ", " + dy + " :: " + ex + ", " + ey);
     }
 
-    public void doTouchMmove(float ex, float ey) {
+    public void doTouchMove(float ex, float ey) {
         float scale = .75f;  // TODO should be configurable (sensitivity setting)
 
         newX = ex;

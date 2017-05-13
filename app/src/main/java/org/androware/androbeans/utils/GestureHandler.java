@@ -278,7 +278,6 @@ public class GestureHandler {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            isFlinging = true;
 
             fling((int) -velocityX, (int) -velocityY);
             return true;
@@ -305,6 +304,8 @@ public class GestureHandler {
         if(Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
             return;   // this stops weak touch movements from causing flings.
         }
+
+        isFlinging = true;
 
         releaseEdgeEffects();
 
