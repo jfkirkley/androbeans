@@ -5,6 +5,7 @@ import android.content.ContextWrapper;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,7 +21,7 @@ import java.util.List;
 public class SwipeDetector implements View.OnTouchListener, GestureHandler.FlingListener {
     public static final String TAG = "swipe";
 
-    public void l(String t) {
+    public static void l(String t) {
         FilterLog.inst().log(TAG, t);
     }
 
@@ -218,19 +219,118 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         return touchDownY;
     }
 
-    public int getFlingX() {
+    private int getFlingXInternal() {
         return gestureHandler == null? 0: this.gestureHandler.getCurrX();
     }
 
-    public int getFlingY() {
-        return gestureHandler == null? 0: this.gestureHandler.getCurrY();
+    public int getFlingX() {
+
+        if(gestureHandler != null) {
+            int cx = gestureHandler.getCurrX();
+            int gdx = gestureHandler.getDiffX();
+
+            if(gestureHandler.isFlinging()) {
+
+                return gdx;
+
+            } else if(touchDown){
+
+                gestureHandler.setCurrX(-(cx + (int)diffX));
+                return (int)diffX;
+            } else {
+
+                return 0;
+            }
+        } else {
+
+            return (int)diffX;
+        }
     }
 
-    public int getFlingDX() {
+    public int getFlingY() {
+
+        if(gestureHandler != null) {
+            int cy = gestureHandler.getCurrY();
+            int gdy = gestureHandler.getDiffY();
+
+            if(gestureHandler.isFlinging()) {
+
+                return gdy;
+
+            } else if(touchDown){
+
+                gestureHandler.setCurrY(-(cy + (int)diffY));
+                return (int)diffY;
+            } else {
+
+                return 0;
+            }
+        } else {
+
+            return (int)diffY;
+        }
+    }
+
+    public int getFlingDXold() {
         return gestureHandler == null? 0: this.gestureHandler.getdX();
     }
 
+    public int getFlingDX() {
+
+        if(gestureHandler != null) {
+            int cx = gestureHandler.getCurrX();
+            int gdx = gestureHandler.getdX();
+
+            if(gestureHandler.isFlinging()) {
+
+                return gdx;
+
+            } else if(touchDown){
+
+                gestureHandler.setCurrX(-(cx + (int)diffX));
+
+                return (int)dx;
+
+            } else {
+
+                return 0;
+            }
+        } else {
+
+
+            return (int)dx;
+        }
+
+    }
+
     public int getFlingDY() {
+
+        if(gestureHandler != null) {
+            int cy = gestureHandler.getCurrY();
+            int gdy = gestureHandler.getdY();
+
+            if(gestureHandler.isFlinging()) {
+
+                return gdy;
+
+            } else if(touchDown){
+
+                gestureHandler.setCurrY(-(cy + (int)diffY));
+
+                return (int)dy;
+
+            } else {
+
+                return 0;
+            }
+        } else {
+
+            return (int)dy;
+        }
+
+    }
+
+    public int getFlingDYold() {
         return gestureHandler == null? 0: this.gestureHandler.getdY();
     }
 
@@ -363,10 +463,11 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
                 touchListener.onTouchMove(this);
             }
         }
-
     }
 
     public void doTouchUp() {
+        touchDown = false;
+
         if (!pastSwipeDetectDelay) {
             // very fast touch or managed not to cause a move event -  touch down event has not yet fired, so fire it
             for(TouchListener touchListener: touchListeners){
@@ -377,6 +478,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         if(!gestureHandler.isFlinging()) {
             handleTouchUp();
         }
+        getGestureHandler().setIgnoreVelocityThreshold(false);
 
     }
 
@@ -386,7 +488,6 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     private void handleTouchUp() {
-        touchDown = false;
 
         touchDownDuration = (new Date()).getTime() - startTouchDownTime;
 

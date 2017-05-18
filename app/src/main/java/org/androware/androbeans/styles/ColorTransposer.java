@@ -62,7 +62,7 @@ public class ColorTransposer {
         incAlpha <<= 24;
 
         int nextColor = (startAlpha + incAlpha) | startRGB;
-        Log.d("wheel", currStep + " : " + Integer.toHexString(incAlpha) + ", " +Integer.toHexString(nextColor));
+        //Log.d("wheel", currStep + " : " + Integer.toHexString(incAlpha) + ", " +Integer.toHexString(nextColor));
 
         return nextColor;
     }

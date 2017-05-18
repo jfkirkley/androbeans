@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.os.Message;
 
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.EdgeEffectCompat;
 
@@ -23,7 +24,7 @@ import android.widget.OverScroller;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import static android.util.Log.d;
 
 
 /**
@@ -218,6 +219,14 @@ public class GestureHandler {
 
     public boolean onTouchEvent(MotionEvent event) {
         //boolean retVal = mScaleGestureDetector.onTouchEvent(event);
+        final int action = MotionEventCompat.getActionMasked(event);
+
+        if( action == MotionEvent.ACTION_DOWN ) {
+            startX = currX;
+            startY = currY;
+
+            resetDxDy();
+        }
         return mGestureDetector.onTouchEvent(event);
     }
 
@@ -296,26 +305,38 @@ public class GestureHandler {
         mEdgeEffectBottom.onRelease();
     }
 
-    public final static int VELOCITY_THRESHOLD = 3000;
+    public final static int VELOCITY_THRESHOLD = 2000;
+    public final static int DIFFXY_THRESHOLD = 100;
+
+    public void setIgnoreVelocityThreshold(boolean ignoreVelocityThreshold) {
+        this.ignoreVelocityThreshold = ignoreVelocityThreshold;
+    }
+
+    public boolean ignoreVelocityThreshold = false;
 
 
     private void fling(int velocityX, int velocityY) {
 
-        if(Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
+        float diffy = SwipeDetector.inst().getDiffY();
+        float diffx = SwipeDetector.inst().getDiffX();
+
+/*
+        if(Math.abs(diffx) < DIFFXY_THRESHOLD && Math.abs(diffy)  < DIFFXY_THRESHOLD) {
+            return;   // this stops weak touch movements from causing flings.
+        }
+*/
+
+        if(!ignoreVelocityThreshold && Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
             return;   // this stops weak touch movements from causing flings.
         }
 
-        isFlinging = true;
 
         releaseEdgeEffects();
 
 
-        resetDxDy();
-        startX = currX;
-        startY = currY;
+        diffX = diffY = 0;
 
         mScroller.forceFinished(true);
-
 
         mScroller.fling(
                 currX,
@@ -335,8 +356,8 @@ public class GestureHandler {
                 0 + ", " + gestureClient.getScrollYRange());
 */
 
-        //Log.d("g", "flingX: " + mScroller.getFinalX() + " , " + currX + ", " + velocityX + ", " + 0 + ", " + gestureClient.getScrollXRange() );
-        //Log.d("g", "flingY: " + mScroller.getFinalY() + " , " + currY + ", " + velocityY + ", " + 0 + ", " + gestureClient.getScrollYRange() );
+        //SwipeDetector.l( diffx + " <> flingX: " + mScroller.getFinalX() + " , " + currX + ", " + velocityX + ", " + 0 + ", " + gestureClient.getScrollXRange() + " >> " + ignoreVelocityThreshold);
+        //SwipeDetector.l( diffy + " <> flingY: " + mScroller.getFinalY() + " , " + currY + ", " + velocityY + ", " + 0 + ", " + gestureClient.getScrollYRange() );
 
 //*/
         xTolerance = Math.abs(mScroller.getFinalX() - currX)*TOLERANCE;
@@ -351,7 +372,7 @@ public class GestureHandler {
 
 
     public void resetDxDy() {
-        dX = dY = 0;
+        diffX = diffY = dX = dY = 0;
     }
 
     public void resetCurrXY() {
@@ -363,46 +384,72 @@ public class GestureHandler {
         currY = y;
     }
 
+    public int getDiffX() {
+        return -diffX;
+    }
+
+    public int getDiffY() {
+        return -diffY;
+    }
+
+    int diffX;
+    int diffY;
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void computeScroll() {
 
 
         if (mScroller.computeScrollOffset()) {
+
             // The scroller isn't finished, meaning a fling or programmatic pan operation is
             // currently active.
 
-            currX = mScroller.getCurrX();
-            currY = mScroller.getCurrY();
+            int cx = mScroller.getCurrX();
+            int cy = mScroller.getCurrY();
 
-            //Log.d("g", currX + ", " + currY + " : " + (nt - flingStartTime));
+            int finalX = mScroller.getFinalX();
+            int finalY = mScroller.getFinalY();
 
-            doScroll(mScroller.getFinalX(), mScroller.getFinalY());
+            float fx = Math.abs(finalX - cx);
+            float fy = Math.abs(finalY - cy);
+
+            //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy  + " :: " + currX + ", " + currY);//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
+
+            if(fx <= xTolerance && fy <= yTolerance) {
+                diffX = finalX - currX;
+                diffY = finalY - currY;
+
+                currX = finalX;
+                currY = finalY;
+
+                Message completeMessage = uiThreadHandler.obtainMessage(0, null);
+                completeMessage.sendToTarget();
+
+                mScroller.forceFinished(true);
+
+                //SwipeDetector.l("last cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+
+                ignoreVelocityThreshold = false;
+            } else {
+
+                diffX = cx - currX;
+                diffY = cy - currY;
+
+                currX = cx;
+                currY = cy;
+
+                //SwipeDetector.l("cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+            }
+
+            dX = currX - startX;
+            dY = currY - startY;
+            doScroll();
         }
 
     }
 
-    public void doScroll(float finalX, float finalY) {
+    public void doScroll(){
 
-        float fx = Math.abs(finalX - currX);
-        float fy = Math.abs(finalY - currY);
-
-        //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy  + " :: " + currX + ", " + currY);//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
-
-        if(fx <= xTolerance && fy <= yTolerance) {
-
-            currY = mScroller.getFinalY();
-            currX = mScroller.getFinalX();
-
-            Message completeMessage = uiThreadHandler.obtainMessage(0, null);
-            completeMessage.sendToTarget();
-
-            mScroller.forceFinished(true);
-            isFlinging = false;
-        }
-
-        dX = currX - startX;
-        dY = currY - startY;
 
         if (currX < 0 && mEdgeEffectLeft.isFinished() && !mEdgeEffectLeftActive) {
 
@@ -452,7 +499,11 @@ public class GestureHandler {
 
 
     public boolean isFlinging() {
-        return isFlinging || !mScroller.isFinished();
+        boolean isFinished = mScroller.isFinished();
+        //SwipeDetector.l(mScroller.isFinished() + " , " + isFlinging);
+        boolean retval = isFlinging || !isFinished;
+        isFlinging = !isFinished;
+        return retval;
     }
 
     public void addFlingListener(FlingListener flingListener) {
@@ -479,6 +530,14 @@ public class GestureHandler {
 
     public void setCurrY(int currY) {
         this.currY = currY;
+    }
+
+    public void setdX(int dX) {
+        this.dX = dX;
+    }
+
+    public void setdY(int dY) {
+        this.dY = dY;
     }
 
 

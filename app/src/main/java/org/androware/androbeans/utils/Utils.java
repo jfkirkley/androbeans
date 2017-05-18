@@ -224,7 +224,7 @@ public class Utils {
             }
         }
     */
-    public static void copyAssetsToExternal(AssetManager assetManager, String extDir) {
+    public static void copyAssetsToExternal(AssetManager assetManager, String extDir, Set<String> excludeFiles) {
 
         String[] files = null;
 
@@ -239,7 +239,7 @@ public class Utils {
         for (String filename : files) {
             InputStream in = null;
             OutputStream out = null;
-            if (!filename.startsWith("images") && !filename.startsWith("sounds") && !filename.startsWith("webkit")) {
+            if (!filename.startsWith("images") && !filename.startsWith("sounds") && !filename.startsWith("webkit") && !excludeFiles.contains(filename)) {
                 try {
                     String extPath = extDir;
                     File outFile = new File(extPath, filename);
