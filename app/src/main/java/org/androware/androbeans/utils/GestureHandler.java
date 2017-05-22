@@ -415,6 +415,10 @@ public class GestureHandler {
 
             //Log.d("g", xTolerance + ", " + yTolerance + " :<>;; " + fx + ", " + fy  + " :: " + currX + ", " + currY);//+ " : " + (Math.abs(fx) - Math.abs(currX)) + ", " + (Math.abs(fy) - Math.abs(currY)));
 
+            boolean logIt = false;
+            String log = "";
+
+
             if(fx <= xTolerance && fy <= yTolerance) {
                 diffX = finalX - currX;
                 diffY = finalY - currY;
@@ -427,7 +431,9 @@ public class GestureHandler {
 
                 mScroller.forceFinished(true);
 
-                //SwipeDetector.l("last cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+                if(logIt) {
+                    log = ("last cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+                }
 
                 ignoreVelocityThreshold = false;
             } else {
@@ -438,11 +444,19 @@ public class GestureHandler {
                 currX = cx;
                 currY = cy;
 
-                //SwipeDetector.l("cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+                if(logIt) {
+                    log = ("cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
+                }
+
             }
 
             dX = currX - startX;
             dY = currY - startY;
+
+            if(logIt) {
+                SwipeDetector.l(dX + ", " + dY + " " + log);
+            }
+
             doScroll();
         }
 
@@ -524,12 +538,34 @@ public class GestureHandler {
         return -dY;
     }
 
+    public void setCurrXandStartX(int currX) {
+        setCurrX(currX);
+        startX = currX;
+    }
+
+    public void setCurrYandStartY(int currY) {
+        setCurrY(currY);
+        startY = currY;
+    }
+
     public void setCurrX(int currX) {
-        this.currX = currX;
+        if(currX < 0) {
+            this.currX = 0;
+        } else if(currX > gestureClient.getScrollXRange()) {
+            this.currX = gestureClient.getScrollXRange();
+        } else {
+            this.currX = currX;
+        }
     }
 
     public void setCurrY(int currY) {
-        this.currY = currY;
+        if(currY < 0) {
+            this.currY = 0;
+        } else if(currY > gestureClient.getScrollYRange()) {
+            this.currY = gestureClient.getScrollYRange();
+        } else {
+            this.currY = currY;
+        }
     }
 
     public void setdX(int dX) {

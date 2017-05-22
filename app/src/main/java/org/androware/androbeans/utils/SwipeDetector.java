@@ -34,6 +34,8 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     private float touchDownX;
     private float touchDownY;
 
+    private boolean isFlinging = false;
+
     private GestureHandler gestureHandler;
 
     public static boolean isPortraitMode = false;
@@ -219,9 +221,6 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         return touchDownY;
     }
 
-    private int getFlingXInternal() {
-        return gestureHandler == null? 0: this.gestureHandler.getCurrX();
-    }
 
     public int getFlingX() {
 
@@ -229,7 +228,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
             int cx = gestureHandler.getCurrX();
             int gdx = gestureHandler.getDiffX();
 
-            if(gestureHandler.isFlinging()) {
+            if(isFlinging) {
 
                 return gdx;
 
@@ -253,7 +252,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
             int cy = gestureHandler.getCurrY();
             int gdy = gestureHandler.getDiffY();
 
-            if(gestureHandler.isFlinging()) {
+            if(isFlinging) {
 
                 return gdy;
 
@@ -271,17 +270,13 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         }
     }
 
-    public int getFlingDXold() {
-        return gestureHandler == null? 0: this.gestureHandler.getdX();
-    }
-
     public int getFlingDX() {
 
         if(gestureHandler != null) {
             int cx = gestureHandler.getCurrX();
             int gdx = gestureHandler.getdX();
 
-            if(gestureHandler.isFlinging()) {
+            if(isFlinging) {
 
                 return gdx;
 
@@ -309,7 +304,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
             int cy = gestureHandler.getCurrY();
             int gdy = gestureHandler.getdY();
 
-            if(gestureHandler.isFlinging()) {
+            if(isFlinging) {
 
                 return gdy;
 
@@ -474,8 +469,8 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
                 touchListener.onTouchDown(this, true);
             }
         }
-
-        if(!gestureHandler.isFlinging()) {
+        isFlinging = gestureHandler.isFlinging();
+        if(!isFlinging) {
             handleTouchUp();
         }
         getGestureHandler().setIgnoreVelocityThreshold(false);
@@ -518,6 +513,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         synchronized (this) {
             if (gestureHandler != null) {
                 this.gestureHandler.onDraw(canvas);
+                isFlinging = this.gestureHandler.isFlinging();
             }
         }
     }
