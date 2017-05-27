@@ -15,7 +15,6 @@ import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.EdgeEffectCompat;
 
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -305,14 +304,18 @@ public class GestureHandler {
         mEdgeEffectBottom.onRelease();
     }
 
-    public final static int VELOCITY_THRESHOLD = 2000;
-    public final static int DIFFXY_THRESHOLD = 100;
+    public final static int VELOCITY_THRESHOLD = 4000;
+    public static int DIFFXY_THRESHOLD = 200;
 
-    public void setIgnoreVelocityThreshold(boolean ignoreVelocityThreshold) {
-        this.ignoreVelocityThreshold = ignoreVelocityThreshold;
+    public void setIgnoreThresholds(boolean ignoreThresholds) {
+        this.ignoreThresholds = ignoreThresholds;
     }
 
-    public boolean ignoreVelocityThreshold = false;
+    public boolean ignoreThresholds = false;
+
+    public boolean pastDiffThreshold(float diff){
+        return ignoreThresholds || Math.abs(diff) > DIFFXY_THRESHOLD;
+    }
 
 
     private void fling(int velocityX, int velocityY) {
@@ -320,14 +323,16 @@ public class GestureHandler {
         float diffy = SwipeDetector.inst().getDiffY();
         float diffx = SwipeDetector.inst().getDiffX();
 
-/*
-        if(Math.abs(diffx) < DIFFXY_THRESHOLD && Math.abs(diffy)  < DIFFXY_THRESHOLD) {
-            return;   // this stops weak touch movements from causing flings.
-        }
+        /*
 */
 
-        if(!ignoreVelocityThreshold && Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
-            return;   // this stops weak touch movements from causing flings.
+        if(!ignoreThresholds) {
+            if(Math.abs(velocityX) < VELOCITY_THRESHOLD && Math.abs(velocityY)  < VELOCITY_THRESHOLD) {
+                return;   // this stops weak touch movements from causing flings.
+            }
+            if(Math.abs(diffx) < DIFFXY_THRESHOLD && Math.abs(diffy)  < DIFFXY_THRESHOLD) {
+                return;   // this stops weak touch movements from causing flings.
+            }
         }
 
 
@@ -356,7 +361,7 @@ public class GestureHandler {
                 0 + ", " + gestureClient.getScrollYRange());
 */
 
-        //SwipeDetector.l( diffx + " <> flingX: " + mScroller.getFinalX() + " , " + currX + ", " + velocityX + ", " + 0 + ", " + gestureClient.getScrollXRange() + " >> " + ignoreVelocityThreshold);
+        SwipeDetector.l( DIFFXY_THRESHOLD + " <<<<<<< " + diffx + " <> flingX: " + mScroller.getFinalX() + " , " + currX + ", " + velocityX + ", " + 0 + ", " + gestureClient.getScrollXRange() + " >> " + ignoreThresholds);
         //SwipeDetector.l( diffy + " <> flingY: " + mScroller.getFinalY() + " , " + currY + ", " + velocityY + ", " + 0 + ", " + gestureClient.getScrollYRange() );
 
 //*/
@@ -435,7 +440,7 @@ public class GestureHandler {
                     log = ("last cxcy: " + cx + " , " + cy + " :: " + currX + ", " + currY + " >> " + diffX + ", " + diffY + " || " + mScroller.isFinished() + " , " + isFlinging);
                 }
 
-                ignoreVelocityThreshold = false;
+                ignoreThresholds = false;
             } else {
 
                 diffX = cx - currX;

@@ -5,7 +5,6 @@ import android.content.ContextWrapper;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.support.v4.view.MotionEventCompat;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -63,11 +62,15 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         float screenWidth = wm.getDefaultDisplay().getWidth();
         float screenHeight = wm.getDefaultDisplay().getHeight();
 
+        l("scrn coords: " + screenHeight + ", " + screenWidth);
+
         isPortraitMode = screenWidth < screenHeight;
 
         swipeThreshold = (screenHeight > screenWidth) ? screenHeight / 10 : screenWidth / 10;
 
         DY_THRESHOLD = DX_THRESHOLD = swipeThreshold / 2;
+
+        GestureHandler.DIFFXY_THRESHOLD = (int) (((screenHeight + screenWidth) / 2f) / 6f);
     }
 
     public boolean isSwiping() {
@@ -221,21 +224,36 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         return touchDownY;
     }
 
+    public boolean haveMovementOnX() {
+        if(touchDown) {
+            int cx = gestureHandler.getCurrX();
+            gestureHandler.setCurrX(-(cx + (int) diffX));
+            return gestureHandler.pastDiffThreshold(dx);
+        }
+        return false;
+    }
+
+    public boolean haveMovementOnY() {
+        if(touchDown) {
+            int cy = gestureHandler.getCurrY();
+            gestureHandler.setCurrY(-(cy + (int)diffY));
+            return gestureHandler.pastDiffThreshold(dy);
+        }
+        return false;
+    }
 
     public int getFlingX() {
 
         if(gestureHandler != null) {
-            int cx = gestureHandler.getCurrX();
-            int gdx = gestureHandler.getDiffX();
 
             if(isFlinging) {
 
-                return gdx;
+                return gestureHandler.getDiffX();
 
-            } else if(touchDown){
+            } else if( haveMovementOnX() ) {
 
-                gestureHandler.setCurrX(-(cx + (int)diffX));
                 return (int)diffX;
+
             } else {
 
                 return 0;
@@ -249,16 +267,13 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     public int getFlingY() {
 
         if(gestureHandler != null) {
-            int cy = gestureHandler.getCurrY();
-            int gdy = gestureHandler.getDiffY();
 
             if(isFlinging) {
 
-                return gdy;
+                return gestureHandler.getDiffY();
 
-            } else if(touchDown){
+            } else if( haveMovementOnY() ) {
 
-                gestureHandler.setCurrY(-(cy + (int)diffY));
                 return (int)diffY;
             } else {
 
@@ -273,16 +288,12 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     public int getFlingDX() {
 
         if(gestureHandler != null) {
-            int cx = gestureHandler.getCurrX();
-            int gdx = gestureHandler.getdX();
 
             if(isFlinging) {
 
-                return gdx;
+                return gestureHandler.getdX();
 
-            } else if(touchDown){
-
-                gestureHandler.setCurrX(-(cx + (int)diffX));
+            } else if( haveMovementOnX() ) {
 
                 return (int)dx;
 
@@ -292,7 +303,6 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
             }
         } else {
 
-
             return (int)dx;
         }
 
@@ -301,16 +311,12 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     public int getFlingDY() {
 
         if(gestureHandler != null) {
-            int cy = gestureHandler.getCurrY();
-            int gdy = gestureHandler.getdY();
 
             if(isFlinging) {
 
-                return gdy;
+                return gestureHandler.getdY();
 
-            } else if(touchDown){
-
-                gestureHandler.setCurrY(-(cy + (int)diffY));
+            } else if( haveMovementOnY() ) {
 
                 return (int)dy;
 
@@ -325,9 +331,6 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
 
     }
 
-    public int getFlingDYold() {
-        return gestureHandler == null? 0: this.gestureHandler.getdY();
-    }
 
     public boolean isTouchDown() {
         return touchDown;
@@ -473,7 +476,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         if(!isFlinging) {
             handleTouchUp();
         }
-        getGestureHandler().setIgnoreVelocityThreshold(false);
+        getGestureHandler().setIgnoreThresholds(false);
 
     }
 

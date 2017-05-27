@@ -5,10 +5,14 @@ import org.androware.androbeans.utils.FilterLog;
 import org.androware.androbeans.utils.ReflectionUtils;
 import org.androware.androbeans.utils.Utils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -159,27 +163,66 @@ public class LinkObjectReadListener extends InitializingReadListener {
                 }
                 Class fieldType = field.getType();
 
-                Object myVal = field.get(thisBean);
-                Object otherVal = field.get(thatBean);
+                Object thisVal = field.get(thisBean);
+                Object thatVal = field.get(thatBean);
 
-                if (otherVal != null) {
+                if (thatVal != null) {
 
-                    if (myVal == null) {
+                    if (thisVal == null) {
 
-                        field.set(thisBean, ReflectionUtils.tryCopy(otherVal));
+                        if (Map.class.isAssignableFrom(fieldType)) {
+
+                            field.set(thisBean, copyMap((Map)thatVal));
+
+                        } else if (List.class.isAssignableFrom(fieldType)) {
+
+                            field.set(thisBean, copyList((List)thatVal));
+
+                        } else if(fieldType.isArray()) {
+
+                            field.set(thisBean, Arrays.copyOf((Object[])thatVal, Array.getLength(thatVal)));
+
+                        } else {
+
+                            field.set(thisBean, ReflectionUtils.tryCopy(thatVal));
+                        }
 
                     } else if (Map.class.isAssignableFrom(fieldType)) {
 
-                        mergeMap((Map) myVal, (Map) otherVal);
+                        mergeMap((Map) thisVal, (Map) thatVal);
 
-                    } else if (!Utils.isPrimitiveOrString(myVal)) {
+                    } else if (List.class.isAssignableFrom(fieldType)) {
 
-                        mergeObject(myVal, otherVal);
+                        field.set(thisBean, copyList((List)thatVal));
+
+                    } else if(fieldType.isArray()) {
+
+                        field.set(thisBean, Arrays.copyOf((Object[])thatVal, Array.getLength(thatVal)));
+
+                    } else if (!Utils.isPrimitiveOrString(thisVal)) {
+
+                        mergeObject(thisVal, thatVal);
                     }
                 }
             }
         } catch (IllegalAccessException e) {
         }
+    }
+
+    public Map copyMap(Map map){
+        HashMap newMap = new HashMap();
+        for(Object k: map.keySet()) {
+            newMap.put(k, map.get(k));
+        }
+        return map;
+    }
+
+    public List copyList(List list){
+        ArrayList newList = new ArrayList();
+        for(Object o: list) {
+            newList.add(o);
+        }
+        return list;
     }
 
     public void mergeMap(Map myMap, Map otherMap) {
