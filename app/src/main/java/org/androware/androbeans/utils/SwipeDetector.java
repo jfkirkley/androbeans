@@ -225,7 +225,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public boolean haveMovementOnX() {
-        if(touchDown) {
+        if(touchDown && gestureHandler != null) {
             int cx = gestureHandler.getCurrX();
             gestureHandler.setCurrX(-(cx + (int) diffX));
             return gestureHandler.pastDiffThreshold(dx);
@@ -234,7 +234,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public boolean haveMovementOnY() {
-        if(touchDown) {
+        if(touchDown && gestureHandler != null) {
             int cy = gestureHandler.getCurrY();
             gestureHandler.setCurrY(-(cy + (int)diffY));
             return gestureHandler.pastDiffThreshold(dy);
@@ -377,7 +377,9 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
     }
 
     public void flingReset(int x, int y) {
-        gestureHandler.resetCurrXY(x, y);
+        if( gestureHandler != null) {
+            gestureHandler.resetCurrXY(x, y);
+        }
     }
 
     @Override
@@ -385,7 +387,9 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         boolean handledInput = false;
         final int action = MotionEventCompat.getActionMasked(event);
 
-        gestureHandler.onTouchEvent(event);
+        if(gestureHandler != null ) {
+            gestureHandler.onTouchEvent(event);
+        }
 
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
@@ -472,7 +476,7 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
                 touchListener.onTouchDown(this, true);
             }
         }
-        isFlinging = gestureHandler.isFlinging();
+        isFlinging = gestureHandler != null && gestureHandler.isFlinging();
         if(!isFlinging) {
             handleTouchUp();
         }

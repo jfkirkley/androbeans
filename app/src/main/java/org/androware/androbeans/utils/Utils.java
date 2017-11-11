@@ -334,6 +334,10 @@ public class Utils {
         return new File(absolutePath).exists();
     }
 
+    public static long fileSize(String absolutePath) {
+        return new File(absolutePath).length();
+    }
+
     public static boolean externalFileExists(ContextWrapper contextWrapper, String type, String path, String fileName) {
         return getExternalFile(contextWrapper, type, path, fileName).exists();
     }
