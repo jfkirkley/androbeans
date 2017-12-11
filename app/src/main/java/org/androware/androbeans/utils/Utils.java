@@ -180,6 +180,11 @@ public class Utils {
         return new FileOutputStream(file);
     }
 
+    public static FileOutputStream getInternalFileOutputStream(ContextWrapper contextWrapper, String fileName) throws IOException {
+        File file = getInternalFile(contextWrapper, fileName);
+        return new FileOutputStream(file);
+    }
+
     public static File getExternalFile(ContextWrapper contextWrapper, String type, String path, String fileName) {
         String fullPath = path != null ? path + fileName : fileName;
         return new File(contextWrapper.getExternalFilesDir(type), fullPath);
@@ -224,6 +229,7 @@ public class Utils {
             }
         }
     */
+
     public static void copyAssetsToExternal(AssetManager assetManager, String extDir, Set<String> excludeFiles) {
 
         String[] files = null;
@@ -271,6 +277,23 @@ public class Utils {
             out.write(buffer, 0, read);
         }
     }
+
+    public static String getExternalDirPath(ContextWrapper contextWrapper, String type) {
+        String state = Environment.getExternalStorageState();
+        String extPath = "";
+        if (false && Environment.MEDIA_MOUNTED.equals(state)) {
+            File baseDirFile = contextWrapper.getExternalFilesDir(type);
+            if (baseDirFile == null) {
+                extPath = contextWrapper.getFilesDir().getAbsolutePath();
+            } else {
+                extPath = baseDirFile.getAbsolutePath();
+            }
+        } else {
+            extPath = contextWrapper.getFilesDir().getAbsolutePath();
+        }
+        return extPath;
+    }
+
 
     public static StringBuffer externalFile2stringBuffer(ContextWrapper contextWrapper, String type, String path, String fileName) {
         return file2stringBuffer(getExternalFile(contextWrapper, type, path, fileName));
@@ -340,6 +363,25 @@ public class Utils {
 
     public static boolean externalFileExists(ContextWrapper contextWrapper, String type, String path, String fileName) {
         return getExternalFile(contextWrapper, type, path, fileName).exists();
+    }
+
+    public static boolean internalFileExists(ContextWrapper contextWrapper, String path) {
+        return fileExists(getInternalFilePath(contextWrapper, path));
+    }
+
+    public static File getInternalFile(ContextWrapper contextWrapper, String path) {
+        return new File(getInternalFilePath(contextWrapper, path));
+    }
+
+    public static String getInternalFilePath(ContextWrapper contextWrapper, String path) {
+        String intPath = contextWrapper.getFilesDir().getAbsolutePath();
+        if (!intPath.endsWith("/") && !path.startsWith("/")) {
+            intPath += "/";
+        }
+        if (intPath.endsWith("/") && path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return intPath + path;
     }
 
     public static void deleteFiles(File dir, final String ext) {

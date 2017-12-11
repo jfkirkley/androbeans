@@ -50,7 +50,7 @@ public class GestureHandler {
 
     private List<FlingListener> flingListeners = new ArrayList<>();
 
-    private static final float TOLERANCE = 0.05f;
+    private static final float TOLERANCE = 0.01f;
 
     private boolean isFlinging = false;
 

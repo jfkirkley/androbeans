@@ -224,6 +224,10 @@ public class SwipeDetector implements View.OnTouchListener, GestureHandler.Fling
         return touchDownY;
     }
 
+    public boolean haveMovement() {
+        return haveMovementOnX() && haveMovementOnY();
+    }
+
     public boolean haveMovementOnX() {
         if(touchDown && gestureHandler != null) {
             int cx = gestureHandler.getCurrX();

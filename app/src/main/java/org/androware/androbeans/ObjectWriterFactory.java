@@ -60,4 +60,13 @@ public class ObjectWriterFactory {
             throw new ObjectWriteException(e);
         }
     }
+
+    public void writeJsonObjectToInternalFile(String path, Object value)  throws ObjectWriteException {
+        try {
+            FileOutputStream fos = Utils.getInternalFileOutputStream(contextWrapper, path);
+            writeJsonObject(fos, value);
+        } catch( IOException e) {
+            throw new ObjectWriteException(e);
+        }
+    }
 }
